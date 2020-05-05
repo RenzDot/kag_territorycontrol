@@ -48,12 +48,12 @@ void onInit(CBlob@ this)
 	this.getCurrentScript().tickFrequency = 1;
 	// this.getCurrentScript().runFlags |= Script::tick_attached;
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		server_CreateBlob("lightningbolt", -1, this.getPosition());
 	}
 	
-	client_AddToChat("Mithrios has been summoned!", SColor(255, 255, 0, 0));
+	client_AddToChat("A Mithrios Device has been summoned.", SColor(255, 255, 0, 0));
 }
 
 void onHitBlob(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitBlob, u8 customData)
@@ -71,8 +71,8 @@ void onHitBlob(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@
 
 void onTick(CBlob@ this)
 {
-	const bool server = getNet().isServer();
-	const bool client = getNet().isClient();
+	const bool server = isServer();
+	const bool client = isClient();
 
 	const f32 kill_count = this.get_f32("kill_count");
 	
@@ -110,12 +110,17 @@ void onTick(CBlob@ this)
 			{
 				CControls@ controls = getControls();
 				Driver@ driver = getDriver();
-
-				Vec2f spos = driver.getScreenPosFromWorldPos(this.getPosition());
-				Vec2f dir = (controls.getMouseScreenPos() - spos);
-				// dir.Normalize();
-				
-				controls.setMousePosition(controls.getMouseScreenPos() - (dir * 0.25f * factor));
+				if(isWindowActive() || isWindowFocused())
+				{
+					Vec2f spos = driver.getScreenPosFromWorldPos(this.getPosition());
+					Vec2f dir = (controls.getMouseScreenPos() - spos);
+					
+					Vec2f move_to = dir * 0.25f * factor;
+					if(move_to.x < 0) move_to.x--;
+					if(move_to.y < 0) move_to.y--;
+					
+					controls.setMousePosition(controls.getMouseScreenPos() - move_to);
+				}
 			}
 			
 			if (getGameTime() > this.get_u32("next_whisper"))
@@ -187,7 +192,7 @@ void onTick(CBlob@ this)
 								
 								if (client)
 								{
-									ParticleAnimated(CFileMatcher("SmallExplosion.png").getFirst(), blob.getPosition() + Vec2f(XORRandom(8) - 4, XORRandom(8) - 4), getRandomVelocity(0, 2, 360), 0, 1.00f + XORRandom(5) * 0.10f, 4, 0.1, false);
+									ParticleAnimated("SmallExplosion.png", blob.getPosition() + Vec2f(XORRandom(8) - 4, XORRandom(8) - 4), getRandomVelocity(0, 2, 360), 0, 1.00f + XORRandom(5) * 0.10f, 4, 0.1, false);
 								}
 								
 								mod /= 2.00f;
@@ -223,7 +228,7 @@ void onTick(CBlob@ this)
 							
 							if (client)
 							{
-								ParticleAnimated(CFileMatcher("SmallExplosion.png").getFirst(), bpos + Vec2f(XORRandom(8) - 4, XORRandom(8) - 4), getRandomVelocity(0, 2, 360), 0, 1.00f + XORRandom(5) * 0.10f, 4, 0.1, false);
+								ParticleAnimated("SmallExplosion.png", bpos + Vec2f(XORRandom(8) - 4, XORRandom(8) - 4), getRandomVelocity(0, 2, 360), 0, 1.00f + XORRandom(5) * 0.10f, 4, 0.1, false);
 							}
 						}
 						
@@ -261,7 +266,7 @@ void onTick(CBlob@ this)
 					// {
 						// CMap@ map = getMap();
 						
-						// if (getNet().isServer())
+						// if (isServer())
 						// {
 							// // SpawnBoom(this, hitPos);
 						// }
@@ -275,7 +280,7 @@ void onTick(CBlob@ this)
 				ShakeScreen(64, 32, startPos);
 				holder.AddForce(-aimDir * 100.00f);
 				
-				if (getNet().isClient())
+				if (isClient())
 				{
 					CSpriteLayer@ zap = this.getSprite().getSpriteLayer("zap");
 					if (zap !is null)

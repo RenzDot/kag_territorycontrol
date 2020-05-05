@@ -45,7 +45,7 @@ bool isInventoryAccessible(CBlob@ this, CBlob@ forBlob)
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		if (cmd == this.getCommandID("store inventory"))
 		{
@@ -53,7 +53,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			if (caller !is null)
 			{
 				CInventory @inv = caller.getInventory();
-				if (caller.getConfig() == "builder")
+				if (caller.getName() == "builder")
 				{
 					CBlob@ carried = caller.getCarriedBlob();
 					if (carried !is null)
@@ -65,13 +65,17 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 						}
 					}
 				}
+				
 				if (inv !is null)
 				{
 					while (inv.getItemsCount() > 0)
 					{
-						CBlob @item = inv.getItem(0);
-						caller.server_PutOutInventory(item);
-						this.server_PutInInventory(item);
+						CBlob@ item = inv.getItem(0);
+						if (!this.server_PutInInventory(item))
+						{
+							caller.server_PutInInventory(item);
+							break;
+						}
 					}
 				}
 			}

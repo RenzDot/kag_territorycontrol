@@ -13,12 +13,12 @@ void onInit(CBlob@ this)
 		ap.SetKeysToTake(key_action1 | key_action2);
 	}
 	
-	if (getNet().isServer())
+	if (isServer())
 	{		
 		CBlob@ blob = server_CreateBlobNoInit("nanobot");
 		blob.set_u16("remote_netid", this.getNetworkID());
 		blob.server_setTeamNum(this.getTeamNum());
-		blob.set_Vec2f("tpos", this.getPosition() + Vec2f(0, -16));
+		blob.set_Vec2f("target_position", this.getPosition() + Vec2f(0, -16));
 		blob.set_u8("mode", 1);
 		blob.setPosition(this.getPosition());
 		
@@ -33,18 +33,24 @@ void onTick(CBlob@ this)
 	if (this.isAttached())
 	{
 		AttachmentPoint@ point = this.getAttachments().getAttachmentPointByName("PICKUP");
-		if(point is null) { return;}
-		CBlob@ holder = point.getOccupied();
-		
-		if (holder is null) {return;}
-		
-		Vec2f pos = holder.getAimPos();
-		
-		CBlob@ remote = getBlobByNetworkID(this.get_u16("remote_netid"));
-		if (remote !is null && remote.getConfig() == "nanobot")
+		if (point !is null)
 		{
-			remote.set_Vec2f("tpos", pos);
-			remote.set_u8("mode", 1 + (holder.isKeyPressed(key_action2) ? 1 : 0) + (holder.isKeyPressed(key_action1) ? -1 : 0));
+			CBlob@ holder = point.getOccupied();
+			if (holder !is null)
+			{
+				Vec2f pos = holder.getAimPos();
+				
+				CBlob@ remote = getBlobByNetworkID(this.get_u16("remote_netid"));
+				if (remote !is null && remote.getName() == "nanobot")
+				{
+					u8 mode = 1;
+					if (point.isKeyPressed(key_action1) || holder.isKeyPressed(key_action1)) mode = 0;
+					else if (point.isKeyPressed(key_action2) || holder.isKeyPressed(key_action2)) mode = 2;
+				
+					remote.set_Vec2f("target_position", pos);
+					remote.set_u8("mode", mode);
+				}
+			}
 		}
 	}
 }
@@ -61,7 +67,7 @@ void onRender(CSprite@ this)
 	if (holder !is null && holder.isMyPlayer())
 	{
 		CBlob@ remote = getBlobByNetworkID(this.getBlob().get_u16("remote_netid"));
-		if (remote !is null && remote.getConfig() == "nanobot")
+		if (remote !is null && remote.getName() == "nanobot")
 		{
 			DrawFillCount(this.getBlob(), remote.get_f32("fill"));
 		}
@@ -98,7 +104,7 @@ void DrawFillCount(CBlob@ this, u16 amount)
 
 	string reqsText = "" + amount;
 
-	u8 numDigits = reqsText.length();
+	u8 numDigits = reqsText.size();
 
 	upperleft -= Vec2f((float(numDigits) * 4.0f), 0);
 	lowerright += Vec2f((float(numDigits) * 4.0f), 0);

@@ -21,7 +21,7 @@ void onInit(CBlob@ this)
 	
 	// this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_up | CBlob::map_collide_down);
 	this.SetMapEdgeFlags(CBlob::map_collide_sides);
-	this.getCurrentScript().tickFrequency = 90;
+	this.getCurrentScript().tickFrequency = 15 + XORRandom(15);
 
 	this.getSprite().RotateBy(90 * XORRandom(4), Vec2f());
 
@@ -30,7 +30,12 @@ void onInit(CBlob@ this)
 
 void onTick(CBlob@ this)
 {
-	if (getNet().isServer() && this.getPosition().y < 0) this.server_Die();
+	if (isServer() && this.getPosition().y < 0) this.server_Die();
+	
+	if (isClient())
+	{
+		MakeParticle(this, "Methane.png");
+	}
 }
 
 void Boom(CBlob@ this)
@@ -41,7 +46,7 @@ void Boom(CBlob@ this)
 	CMap@ map = getMap();
 	Vec2f pos = this.getPosition();
 
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBlob@[] blobs;
 
@@ -106,11 +111,28 @@ void onCollision(CBlob@ this, CBlob@ blob, bool solid)
 	if (blob is null) return;
 	if (blob.hasTag("gas")) return;
 
-	if ((blob.getConfig() == "lantern" ? blob.isLight() : false) ||
-		blob.getConfig() == "fireplace" ||
-		(blob.getConfig() == "arrow" && blob.get_u8("arrow type") == ArrowType::fire))
+	if ((blob.getName() == "lantern" ? blob.isLight() : false) ||
+		blob.getName() == "fireplace" ||
+		(blob.getName() == "arrow" && blob.get_u8("arrow type") == ArrowType::fire))
 	{
 		this.Tag("lit");
 		this.server_Die();
+	}
+}
+
+void MakeParticle(CBlob@ this, const string filename = "LargeSmoke")
+{
+	if (isClient())
+	{
+		CParticle@ particle = ParticleAnimated(filename, this.getPosition() + Vec2f(16 - XORRandom(32), 8 - XORRandom(32)), Vec2f(), float(XORRandom(360)), 1.0f + (XORRandom(50) / 100.0f), 4, 0.00f, false);
+		if (particle !is null) 
+		{
+			particle.collides = false;
+			particle.deadeffect = 1;
+			particle.bounce = 0.0f;
+			particle.fastcollision = true;
+			particle.lighting = false;
+			particle.setRenderStyle(RenderStyle::additive);
+		}
 	}
 }

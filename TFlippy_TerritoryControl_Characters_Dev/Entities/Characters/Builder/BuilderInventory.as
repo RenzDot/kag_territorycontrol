@@ -111,6 +111,7 @@ void MakeBlocksMenu(CInventory@ this, const Vec2f &in INVENTORY_CE)
 			CBitStream missing;
 			if(hasRequirements(this, b.reqs, missing))
 			{
+				//print("true");
 				button.hoverText = b.description + "\n" + getButtonRequirementsText(b.reqs, false);
 			}
 			else
@@ -198,7 +199,7 @@ void onCommand(CInventory@ this, u8 cmd, CBitStream@ params)
 
 	if(cmd >= Builder::make_block && cmd < Builder::make_reserved)
 	{
-		const bool isServer = getNet().isServer();
+		const bool is_server = isServer();
 
 		BuildBlock[][]@ blocks;
 		if(!blob.get(blocks_property, @blocks)) return;
@@ -213,7 +214,7 @@ void onCommand(CInventory@ this, u8 cmd, CBitStream@ params)
 			if(!canBuild(blob, @blocks[PAGE], i)) return;
 
 			// put carried in inventory thing first
-			if(isServer)
+			if(is_server)
 			{
 				CBlob@ carryBlob = blob.getCarriedBlob();
 				if(carryBlob !is null)
@@ -292,9 +293,11 @@ void onCommand(CInventory@ this, u8 cmd, CBitStream@ params)
 void onRender(CSprite@ this)
 {
 	CMap@ map = getMap();
-
 	CBlob@ blob = this.getBlob();
 	CBlob@ localBlob = getLocalPlayerBlob();
+
+	if(map is null || blob is null || localBlob is null) return;
+
 	if(localBlob is blob)
 	{
 		// no build zone show

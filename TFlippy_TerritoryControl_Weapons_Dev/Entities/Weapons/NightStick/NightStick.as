@@ -51,17 +51,17 @@ void onTick(CBlob@ this)
 						{
 							u8 knock;
 						
-							if (blob.getConfig() == "slave") knock = 45 + (1.0f - (blob.getHealth() / blob.getInitialHealth())) * (30 + XORRandom(50)) * 4.0f;
+							if (blob.getName() == "slave") knock = 45 + (1.0f - (blob.getHealth() / blob.getInitialHealth())) * (30 + XORRandom(50)) * 4.0f;
 							else knock = 35 + (1.0f - (blob.getHealth() / blob.getInitialHealth())) * (30 + XORRandom(50));
 						
 							SetKnocked(blob, knock);
 							
-							// if (getNet().isClient())
+							// if (isClient())
 							// {
 								// this.getSprite().PlaySound("nightstick_hit" + (1 + XORRandom(3)) + ".ogg", 0.9f, 0.8f);
 							// }
 							
-							if (getNet().isServer())
+							if (isServer())
 							{
 								holder.server_Hit(blob, blob.getPosition(), Vec2f(), 0.125f, HittersTC::staff, true);
 								holder.server_Hit(this, this.getPosition(), Vec2f(), 0.125f, HittersTC::staff, true);

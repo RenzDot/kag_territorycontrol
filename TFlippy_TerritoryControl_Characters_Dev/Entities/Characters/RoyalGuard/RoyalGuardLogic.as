@@ -144,7 +144,7 @@ void onTick(CBlob@ this)
 		
 	//with the code about menus and myplayer you can slash-cancel;
 	//we'll see if knights dmging stuff while in menus is a real issue and go from there
-	if (knocked > 0)// || myplayer && getHUD().hasMenus())
+	if (knocked > 0 || (myplayer && getHUD().hasMenus()))// || myplayer && getHUD().hasMenus())
 	{
 		knight.state = KnightStates::normal; //cancel any attacks or shielding
 		knight.swordTimer = 0;
@@ -290,7 +290,7 @@ void onTick(CBlob@ this)
 	}
 	else if ((pressed_a1 || swordState) && !moveVars.wallsliding)   //no attacking during a slide
 	{
-		if (getNet().isClient())
+		if (isClient())
 		{
 			if (knight.swordTimer == KnightVars::slash_charge_level2)
 			{
@@ -326,7 +326,7 @@ void onTick(CBlob@ this)
 			knight.swordTimer = 0;
 		}
 
-		if (knight.state == KnightStates::sword_drawn && getNet().isServer())
+		if (knight.state == KnightStates::sword_drawn && isServer())
 		{
 			knight_clear_actor_limits(this);
 		}
@@ -628,7 +628,7 @@ void onTick(CBlob@ this)
 		}
 	}
 
-	if (!swordState && getNet().isServer())
+	if (!swordState && isServer())
 	{
 		knight_clear_actor_limits(this);
 	}
@@ -650,7 +650,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		{
 			if (bombType == 0)
 			{
-				if (getNet().isServer())
+				if (isServer())
 				{
 					CBlob @blob = server_CreateBlob("bomb", this.getTeamNum(), this.getPosition());
 					if (blob !is null)
@@ -662,7 +662,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			}
 			else if (bombType == 1)
 			{
-				if (getNet().isServer())
+				if (isServer())
 				{
 					CBlob @blob = server_CreateBlob("waterbomb", this.getTeamNum(), this.getPosition());
 					if (blob !is null)
@@ -804,7 +804,7 @@ bool isJab(f32 damage)
 
 void DoAttack(CBlob@ this, f32 damage, f32 aimangle, f32 arcdegrees, u8 type, int deltaInt, KnightInfo@ info)
 {
-	if (!getNet().isServer())
+	if (!isServer())
 	{
 		return;
 	}
@@ -1264,5 +1264,5 @@ bool canHit(CBlob@ this, CBlob@ b)
 
 void onDie(CBlob@ this)
 {
-	if (getNet().isServer()) server_CreateBlob("royalarmor", this.getTeamNum(), this.getPosition());
+	if (isServer()) server_CreateBlob("royalarmor", this.getTeamNum(), this.getPosition());
 }

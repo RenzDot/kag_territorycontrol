@@ -12,7 +12,7 @@ void onInit(CBlob@ this)
 	
 	// this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_up | CBlob::map_collide_down);
 	this.SetMapEdgeFlags(CBlob::map_collide_sides);
-	this.getCurrentScript().tickFrequency = 30 + XORRandom(15);
+	this.getCurrentScript().tickFrequency = 15 + XORRandom(15);
 	
 	if (!this.exists("toxicity")) this.set_f32("toxicity", 0.50f);
 	
@@ -22,7 +22,7 @@ void onInit(CBlob@ this)
 
 void onTick(CBlob@ this)
 {
-	if (getNet().isServer() && this.getPosition().y < 0) this.server_Die();
+	if (isServer() && this.getPosition().y < 0) this.server_Die();
 	
 	CBlob@[] blobsInRadius;
 	if (this.getMap().getBlobsInRadius(this.getPosition(), this.getRadius() * 1.5f, @blobsInRadius))
@@ -34,7 +34,7 @@ void onTick(CBlob@ this)
 			{
 				blob.set_u8("mustard value", Maths::Clamp(blob.get_u8("mustard value") + 1, 0, 64));
 			
-				if (getNet().isServer()) this.server_Hit(blob, blob.getPosition(), Vec2f(0, 0), 0.0625f, Hitters::burn);
+				if (isServer()) this.server_Hit(blob, blob.getPosition(), Vec2f(0, 0), 0.0625f, Hitters::burn);
 			
 				if (!blob.hasTag("mustarded"))
 				{
@@ -44,6 +44,11 @@ void onTick(CBlob@ this)
 				}
 			}
 		}
+	}
+
+	if(isClient())
+	{
+		MakeParticle(this, "Mustard.png");
 	}
 }
 
@@ -62,3 +67,20 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 	// if (blob is null) return;
 	// if (blob.hasTag("gas")) return;
 // }
+
+void MakeParticle(CBlob@ this, const string filename = "LargeSmoke")
+{
+	if (isClient())
+	{
+		CParticle@ particle = ParticleAnimated(filename, this.getPosition() + Vec2f(16 - XORRandom(32), 8 - XORRandom(32)), Vec2f(), float(XORRandom(360)), 1.0f + (XORRandom(50) / 100.0f), 4, 0.00f, false);
+		if (particle !is null) 
+		{
+			particle.collides = false;
+			particle.deadeffect = 1;
+			particle.bounce = 0.0f;
+			particle.fastcollision = true;
+			particle.lighting = false;
+			particle.setRenderStyle(RenderStyle::additive);
+		}
+	}
+}

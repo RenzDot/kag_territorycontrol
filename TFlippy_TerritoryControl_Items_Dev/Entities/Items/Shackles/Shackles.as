@@ -1,6 +1,7 @@
 #include "Hitters.as";
 #include "Knocked.as";
 #include "Survival_Structs.as";
+#include "DeityCommon.as";
 
 void onInit(CBlob@ this)
 {
@@ -46,21 +47,21 @@ void onTick(CBlob@ this)
 					for (uint i = 0; i < hitInfos.length; i++)
 					{
 						CBlob@ blob = hitInfos[i].blob;
-						if (blob !is null && blob.hasTag("player") && blob.getTeamNum() != team)
+						if (blob !is null && blob.hasTag("player") && blob.getTeamNum() != team && (blob.get_u8("deity_id") != Deity::ivan || blob.get_u8("deity_id") != Deity::swaglag))
 						{
 							f32 chance = 1.0f - (blob.getHealth() / blob.getInitialHealth());
 							if (blob.get_f32("babbyed") > 0) chance = 1.00f;
 							
-							print("" + chance);
+							// print("" + chance);
 						
 							if ((chance > 0.50f && XORRandom(100) < chance * 80) || (getKnocked(blob) > 15 && chance > 0.2f))
 							{
-								if (getNet().isClient())
-								{
-									this.getSprite().PlaySound("shackles_success.ogg", 1.25f, 1.00f);
-								}
+								// if (isClient())
+								// {
+									// this.getSprite().PlaySound("shackles_success.ogg", 1.25f, 1.00f);
+								// }
 								
-								if (getNet().isServer())
+								if (isServer())
 								{
 									CBlob@ slave = server_CreateBlob("slave", holder.getTeamNum(), blob.getPosition());
 									slave.set_u8("slaver_team", holder.getTeamNum());
@@ -79,7 +80,7 @@ void onTick(CBlob@ this)
 							{
 								this.set_u32("next attack", getGameTime() + 90);
 							
-								if (getNet().isClient())
+								if (isClient())
 								{
 									this.getSprite().PlaySound("shackles_fail.ogg", 0.80f, 1.00f);
 								}

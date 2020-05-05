@@ -1,5 +1,6 @@
 #include "Hitters.as";
 #include "HittersTC.as";
+#include "DeityCommon.as";
 
 //huge bug with SetKeysToTake only disabling stuff CLIENTSIDE - you're still actually jabbing when using a weapon
 	//looks like the only way to fix this is to add a check to all classes - do they have a tag "disableLMB", or custom tag to disable LMB stuff.
@@ -203,7 +204,7 @@ void GunTick(CBlob@ this)
 			if(!this.get_bool("gun_shotgunReload")){
 				this.set_bool("gun_doReload",false);
 			}else{
-				if(getNet().isClient()) {
+				if(isClient()) {
 					PlayWeaponSound(this,"gun_soundReload");
 				}
 				if(this.get_u32("gun_clip")!=this.get_u32("gun_clipSize") && CountAmmo(inv,ammoItem)>0) {
@@ -230,7 +231,7 @@ void GunTick(CBlob@ this)
 	f32	ammoUsage=	this.get_f32("gun_ammoUsage");
 	CControls@ controls=	getControls();
 	if(player !is null){
-		if(getNet().isClient() && player.isMyPlayer()){
+		if(isClient() && player.isMyPlayer()){
 			if(controls.isKeyJustPressed(KEY_KEY_R) && this.hasCommandID("cmd_gunReload")) {
 				CBitStream stream;
 				this.SendCommand(this.getCommandID("cmd_gunReload"),stream);
@@ -245,7 +246,7 @@ void GunTick(CBlob@ this)
 					StartReload(this,inv,ammoItem,clip,clipSize);
 				}
 			}else{
-				if(getNet().isClient() && holder.hasTag("flesh")) {
+				if(isClient() && holder.hasTag("flesh")) {
 					this.getSprite().PlaySound("Entities/Characters/Sounds/NoAmmo.ogg",0.6f,1.0);
 				}
 			}
@@ -284,7 +285,7 @@ void GunTick(CBlob@ this)
 				if(!this.get_bool("gun_isAutomatic")){
 					this.set_bool("gun_needsRelease",true);
 				}
-				if(getNet().isClient()) {
+				if(isClient()) {
 					if(!soundFireLoop){
 						PlayWeaponSound(this,"gun_soundFire");
 					}else{
@@ -300,7 +301,7 @@ void GunTick(CBlob@ this)
 					}
 				}
 			}else{
-				if(getNet().isClient()) {
+				if(isClient()) {
 					if(soundFireLoop){
 						if(!sprite.getEmitSoundPaused()){
 							sprite.SetEmitSoundPaused(true);
@@ -314,7 +315,7 @@ void GunTick(CBlob@ this)
 					StartReload(this,inv,ammoItem,clip,clipSize);
 				}else{
 					this.set_bool("gun_needsRelease",true);
-					if(getNet().isClient() && holder.hasTag("flesh")) 
+					if(isClient() && holder.hasTag("flesh")) 
 					{
 						sprite.PlaySound("Entities/Characters/Sounds/NoAmmo.ogg",0.6f,1.0);
 						if(soundFireLoop){
@@ -331,7 +332,7 @@ void GunTick(CBlob@ this)
 		if(this.get_bool("gun_needsRelease")){
 			this.set_bool("gun_needsRelease",false);
 		}
-		if(getNet().isClient()) {
+		if(isClient()) {
 			if(soundFireLoop){
 				if(!sprite.getEmitSoundPaused()){
 					sprite.SetEmitSoundPaused(true);
@@ -368,6 +369,15 @@ void Shoot(CBlob@ this)
 	f32 damage=	this.get_f32("gun_fireDamage");
 	f32 range=	this.get_f32("gun_fireRange");
 
+	if (holder.get_u8("deity_id") == Deity::swaglag)
+	{
+		CBlob@ altar = getBlobByName("altar_swaglag");
+		if (altar !is null)
+		{
+			damage *= 1.00f + Maths::Min(altar.get_f32("deity_power") * 0.01f, 2.00f);
+		}
+	}
+
 	string fireProj=this.get_string("gun_fireProj");
 
 	if(fireProj==""){
@@ -398,7 +408,7 @@ void Shoot(CBlob@ this)
 			length = (hitPos - startPos).Length();
 			
 			bool blobHit = getMap().getHitInfosFromRay(startPos, angle + (flip ? 180.0f : 0.0f),length,this,@hitInfos);
-			if(getNet().isClient())
+			if(isClient())
 			{
 				DrawLine(this.getSprite(), i, startPos,length / 32, jitter, this.isFacingLeft());
 		
@@ -414,7 +424,7 @@ void Shoot(CBlob@ this)
 				}
 			}
 			
-			if(getNet().isServer()) 
+			if(isServer()) 
 			{
 				const bool force_nonsolid = this.exists("gun_force_nonsolid") && this.get_bool("gun_force_nonsolid");
 			
@@ -434,8 +444,9 @@ void Shoot(CBlob@ this)
 									f32 dmg = damage*Maths::Max(0.1,falloff)*(blob.hasTag("door") ? 0.2f : 1.0f);
 									Vec2f dir = blob.getPosition() - this.getPosition();
 									dir.Normalize();
-								
-									holder.server_Hit(blob, hitInfos[i].hitpos, dir, dmg, this.get_u8("gun_hitter"), false);
+									
+									holder.server_Hit(blob, hitInfos[i].hitpos, dir, dmg * 0.99f, this.get_u8("gun_hitter"), false);
+									this.server_Hit(blob, hitInfos[i].hitpos, dir, dmg * 0.01f, this.get_u8("gun_hitter"), false); // Hack
 									
 									// string name = holder.getName();
 									// if(name == "soldierchicken" || name == "scoutchicken"){blob.Tag("chickened");}
@@ -463,7 +474,7 @@ void Shoot(CBlob@ this)
 	else
 	{
 		//Fire a projectile
-		if(getNet().isServer()) 
+		if(isServer()) 
 		{
 			f32 angle =	this.getAngleDegrees();
 			Vec2f dir=		Vec2f((this.isFacingLeft() ? -1 : 1),0.0f).RotateBy(angle);
@@ -633,7 +644,7 @@ void StartReload(CBlob@ this,CInventory@ inv,string ammoItem,u32 clip,u32 clipSi
 	this.set_bool("gun_wasEmpty",clip==0);
 	if(!this.get_bool("gun_shotgunReload")){
 		//clip-based reload
-		if(getNet().isClient()) {
+		if(isClient()) {
 			PlayWeaponSound(this,"gun_soundReload");
 		}
 		this.set_u32("gun_readyTime",getGameTime()+this.get_u32("gun_reloadTime"));

@@ -1,8 +1,8 @@
 #include "PlacementCommon.as"
 #include "BuildBlock.as"
 #include "Requirements.as"
-
 #include "GameplayEvents.as"
+#include "DeityCommon.as"
 
 //server-only
 void PlaceBlock(CBlob@ this, u8 index, Vec2f cursorPos)
@@ -20,7 +20,60 @@ void PlaceBlock(CBlob@ this, u8 index, Vec2f cursorPos)
 	CInventory@ inv = this.getInventory();
 	if (bc.tile > 0 && hasRequirements(inv, bc.reqs, missing))
 	{
-		server_TakeRequirements(inv, bc.reqs);
+		bool take = true;
+		
+		u8 deity_id = this.get_u8("deity_id");
+		switch (deity_id)
+		{
+			case Deity::mason:
+			{
+				CBlob@ altar = getBlobByName("altar_mason");
+				if (altar !is null)
+				{
+					// print("free block chance: " + altar.get_f32("deity_power") * 0.01f);
+					if (XORRandom(100) < altar.get_f32("deity_power") * 0.01f)
+					{
+						take = false;
+						// print("free block!");		
+					}
+					else
+					{
+						altar.add_f32("deity_power", 1);
+						if (isServer()) this.Sync("deity_power", false);
+					}
+				}
+			}
+		
+			case Deity::foghorn:
+			{
+				if (getMap().isBlobWithTagInRadius("upf property", cursorPos, 128))
+				{
+					CBlob@ altar = getBlobByName("altar_foghorn");
+					if (altar !is null)
+					{
+						f32 reputation_penalty = 10.00f;
+						if (isClient())
+						{
+							if (this.isMyPlayer()) 
+							{
+								client_AddToChat("You have tampered with UPF property! (" + -reputation_penalty + " reputation)", 0xffff0000);
+								Sound::Play("Collect.ogg", cursorPos, 2.00f, 0.80f);
+							}
+						}
+						
+						altar.add_f32("deity_power", -reputation_penalty);
+						if (isServer()) altar.Sync("deity_power", false);
+					}
+				}
+			}
+		break;
+		}
+		
+		if (take)
+		{
+			server_TakeRequirements(inv, bc.reqs);
+		}
+		
 		getMap().server_SetTile(cursorPos, bc.tile);
 
 		SendGameplayEvent(createBuiltBlockEvent(this.getPlayer(), bc.tile));
@@ -219,7 +272,7 @@ void onRender(CSprite@ this)
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
-	if (getNet().isServer() && cmd == this.getCommandID("placeBlock"))
+	if (isServer() && cmd == this.getCommandID("placeBlock"))
 	{
 		u8 index = params.read_u8();
 		Vec2f pos = params.read_Vec2f();

@@ -3,6 +3,7 @@
 #include "Hitters.as";
 #include "HittersTC.as";
 #include "Knocked.as";
+#include "DeityCommon.as";
 
 const f32 radius = 128.0f;
 
@@ -67,7 +68,7 @@ bool canBePickedUp(CBlob@ this, CBlob@ byBlob)
 void onAttach(CBlob@ this, CBlob@ blob, AttachmentPoint@ point)
 {
 	CPlayer@ ply = blob.getPlayer();
-	if (this.get_u16("soulbound_netid") == 0)
+	if (blob.get_u8("deity_id") != Deity::mithrios && this.get_u16("soulbound_netid") == 0)
 	{
 		this.set_u16("soulbound_netid", ply.getNetworkID());
 		
@@ -112,12 +113,17 @@ void onTick(CBlob@ this)
 			
 			CControls@ controls = getControls();
 			Driver@ driver = getDriver();
-
-			Vec2f spos = driver.getScreenPosFromWorldPos(this.getPosition());
-			Vec2f dir = (controls.getMouseScreenPos() - spos);
-			// dir.Normalize();
-			
-			controls.setMousePosition(controls.getMouseScreenPos() - (dir * 0.75f * factor));
+			if(isWindowActive() || isWindowFocused())
+			{
+				Vec2f spos = driver.getScreenPosFromWorldPos(this.getPosition());
+				Vec2f dir = (controls.getMouseScreenPos() - spos);
+				
+				Vec2f move_to = dir * 0.75f * factor;
+				if(move_to.x < 0) move_to.x--;
+				if(move_to.y < 0) move_to.y--;
+				
+				controls.setMousePosition(controls.getMouseScreenPos() - move_to);
+			}
 			
 			if (getGameTime() > this.get_u32("next_whisper"))
 			{
@@ -175,13 +181,13 @@ void Smite(CBlob@ this, CBlob@ target)
 	SetKnocked(target, 90);
 	target.set_u32("next smite", getGameTime() + 30);
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		f32 damage = target.getInitialHealth() * 0.75f;
 		this.server_Hit(target, target.getPosition(), dir, 1000.00f, Hitters::fire);
 	}
 	
-	if (getNet().isClient())
+	if (isClient())
 	{
 		this.getSprite().PlaySound("DemonicBoing");
 		

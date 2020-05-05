@@ -22,7 +22,7 @@ void onInit( CBrain@ this )
 void onInit(CBlob@ this)
 {
 	// this.Tag("npc");
-	this.getSprite().addSpriteLayer("isOnScreen", "NoTexture.png", 0, 0);
+	this.getSprite().addSpriteLayer("isOnScreen","NoTexture.png",1,1);
 	this.Tag("flesh");
 	this.Tag("dangerous");
 	this.Tag("map_damage_dirt");
@@ -206,7 +206,7 @@ void onDie(CBlob@ this)
 		}
 	}
 
-	// if (getNet().isServer())
+	// if (isServer())
 	// {
 		// CBlob@ boom = server_CreateBlobNoInit("nukeexplosion");
 		// boom.setPosition(this.getPosition());
@@ -224,7 +224,7 @@ void onDie(CBlob@ this)
 
 void onTick(CBrain@ this)
 {
-	if (!getNet().isServer()) return;
+	if (!isServer()) return;
 
 	CBlob @blob = this.getBlob();
 	
@@ -279,7 +279,7 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 			break;			
 	}
 
-	if (getNet().isClient())
+	if (isClient())
 	{
 		if (getGameTime() > this.get_u32("next sound") - 25)
 		{
@@ -288,7 +288,7 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 		}
 	}
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBrain@ brain = this.getBrain();
 		

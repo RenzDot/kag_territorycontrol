@@ -72,7 +72,7 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 	if (customData == Hitters::explosion)
 	{
 		this.Tag("exploded");
-		if (getNet().isServer()) this.server_Die();
+		if (isServer()) this.server_Die();
 	}
 	
 	return damage;
@@ -126,7 +126,7 @@ void DoExplosion(CBlob@ this)
 
 void MakeParticle(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
+	if (!isClient()) return;
 
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(4), XORRandom(100) * -0.00005f, true);
+	ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(4), XORRandom(100) * -0.00005f, true);
 }

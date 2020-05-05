@@ -131,8 +131,8 @@ void onInit(CBlob@ this)
 
 	this.set_Vec2f("shop offset", Vec2f(0, 0));
 	this.set_Vec2f("shop menu size", Vec2f(4, 4));
-	this.set_string("shop description", name + " the Trader");
-	this.setInventoryName(name + " the Trader");
+	this.set_string("shop description", name + " the Lawyer");
+	this.setInventoryName(name + " the Lawyer");
 	this.set_u8("shop icon", 25);
 	
 	this.set_u32("lastDanger", 0);
@@ -291,7 +291,7 @@ void onTick(CBlob@ this)
 			return;
 		}
 	
-		if (getNet().isServer() && getGameTime() % 150 == 0)
+		if (isServer() && getGameTime() % 150 == 0)
 		{
 			const u8 myTeam = this.getTeamNum();
 
@@ -320,23 +320,23 @@ void onTick(CBlob@ this)
 			{
 				// this.set_u32("lastDanger", getGameTime());
 				
-				text = textsDanger[XORRandom(textsDanger.length())];
-				this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.length())]);
+				text = textsDanger[XORRandom(textsDanger.size())];
+				this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.size())]);
 			}
 			else
 			{
 				if (getGameTime() - this.get_u32("lastDanger") < 30 * 60)
 				{
-					text = textsWon[XORRandom(textsWon.length())];
+					text = textsWon[XORRandom(textsWon.size())];
 				}
 				else
 				{
-					text = textsIdle[XORRandom(textsIdle.length())];
-					this.getSprite().PlaySound(soundsTalk[XORRandom(soundsTalk.length())]);
+					text = textsIdle[XORRandom(textsIdle.size())];
+					this.getSprite().PlaySound(soundsTalk[XORRandom(soundsTalk.size())]);
 				}
 			}
 
-			if (getNet().isServer())
+			if (isServer())
 			{
 				CBitStream stream;
 				stream.write_string(text);
@@ -364,7 +364,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		
 		if (callerBlob is null) return;
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			string[] spl = name.split("-");
 			
@@ -413,7 +413,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 
 void onDie(CBlob@ this)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		server_DropCoins(this.getPosition(), XORRandom(400));
 	}

@@ -68,7 +68,7 @@ bool GiveSpawnResources(CRules@ this, CBlob@ blob, CPlayer@ player, CTFPlayerInf
 	}
 	else if (blob.getName() == "archer")
 	{
-		ret = SetMaterials(blob, "mat_arrows", 30) || ret;
+		// ret = SetMaterials(blob, "mat_arrows", 30) || ret;
 
 		if (ret)
 		{
@@ -82,15 +82,6 @@ bool GiveSpawnResources(CRules@ this, CBlob@ blob, CPlayer@ player, CTFPlayerInf
 			info.items_collected |= ItemFlag::Knight;
 		}
 	}
-	else if (blob.getName() == "sapper")
-	{
-		ret = SetMaterials(blob, "mat_bombs", 2) || ret;
-	
-		if (ret)
-		{
-			info.items_collected |= ItemFlag::Knight;
-		}
-	}
 
 	return ret;
 }
@@ -98,7 +89,7 @@ bool GiveSpawnResources(CRules@ this, CBlob@ blob, CPlayer@ player, CTFPlayerInf
 //when the player is set, give materials if possible
 void onSetPlayer(CRules@ this, CBlob@ blob, CPlayer@ player)
 {
-	if (!getNet().isServer())
+	if (!isServer())
 		return;
 
 	if (blob !is null && player !is null)
@@ -191,7 +182,7 @@ void SetCTFTimer(CRules@ this, CPlayer@ p, s32 time)
 //prevents dying over and over, and allows getting more mats throughout the game
 void doGiveSpawnMats(CRules@ this, CPlayer@ p, CBlob@ b, Players@ players)
 {
-	if (!getNet().isServer()) return;
+	if (!isServer()) return;
 
 	CTFPlayerInfo@ info = getCTFPlayerByName(players.list, p.getUsername());
 

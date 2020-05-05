@@ -11,7 +11,7 @@ const f32 max_distance = 256.00f;
 
 void onInit( CBrain@ this )
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		InitBrain( this );
 		this.server_SetActive(true);
@@ -47,7 +47,7 @@ void onTick(CBlob@ this)
 {
 	CBrain@ brain = this.getBrain();
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBlob@ target = brain.getTarget();
 		
@@ -131,7 +131,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
 	if (cmd == this.getCommandID("automat_give"))
 	{
-		if (getNet().isServer())
+		if (isServer())
 		{
 			CBlob@ caller = getBlobByNetworkID(params.read_u16());
 			
@@ -139,7 +139,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			{
 				CBlob@ carried = caller.getCarriedBlob();
 	
-				if (carried !is null && this !is null && carried.getConfig() == "automat") return;
+				if (carried !is null && this !is null && carried.getName() == "automat") return;
 	
 				if (!this.hasAttached())
 				{
@@ -164,7 +164,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 
 f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBrain@ brain = this.getBrain();
 		

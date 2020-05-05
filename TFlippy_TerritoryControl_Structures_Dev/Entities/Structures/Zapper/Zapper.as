@@ -3,6 +3,7 @@
 #include "Hitters.as";
 #include "HittersTC.as";
 #include "Knocked.as";
+#include "DeityCommon.as";
 
 const f32 radius = 128.0f;
 const f32 damage = 5.00f;
@@ -58,7 +59,7 @@ bool isInventoryAccessible(CBlob@ this, CBlob@ forBlob)
 	if (this.getTeamNum() == forBlob.getTeamNum() || (this.getTeamNum() > 100 && this.getTeamNum() < 200))
 	{
 		CBlob@ carried = forBlob.getCarriedBlob();
-		return (carried is null ? true : carried.getConfig() == "mat_battery");
+		return (carried is null ? true : carried.getName() == "mat_battery");
 	}
 	else return false;
 }
@@ -113,6 +114,7 @@ void onTick(CBlob@ this)
 				CBlob@ b = blobsInRadius[i];
 				u8 team = b.getTeamNum();
 				
+				if (myTeam == 250 && b.get_u8("deity_id") == Deity::foghorn) continue;
 				if (team != myTeam && b.hasTag("flesh") && !b.hasTag("dead") && !map.rayCastSolid(this.getPosition(), b.getPosition()))
 				{
 					f32 dist = (b.getPosition() - this.getPosition()).Length();
@@ -164,13 +166,13 @@ void Zap(CBlob@ this, CBlob@ target)
 	SetKnocked(target, 60);
 	this.set_u32("next zap", getGameTime() + delay);
 
-	if (getNet().isServer())
+	if (isServer())
 	{
 		this.server_Hit(target, target.getPosition(), Vec2f(0, 0), damage, HittersTC::electric, true);
 		SetFuel(this, Maths::Max(0, fuel - 5));
 	}
 	
-	if (getNet().isClient())
+	if (isClient())
 	{				
 		bool flip = this.isFacingLeft();
 	

@@ -1,4 +1,5 @@
 #include "LootSystem.as";
+#include "DeityCommon.as";
 
 const LootItem@[] c_items =
 {
@@ -34,6 +35,7 @@ const LootItem@[] c_items =
 	LootItem("beagle", 1, 1, 400),
 	LootItem("autoshotgun", 1, 0, 197),
 	LootItem("sgl", 1, 0, 100),
+	LootItem("rpg", 1, 0, 150),
 	LootItem("raygun", 0, 1, 179),
 	LootItem("rekt", 1, 0, 15),
 	LootItem("zatniktel", 1, 0, 20),
@@ -70,9 +72,9 @@ void onInit(CBlob@ this)
 
 void GetButtonsFor(CBlob@ this, CBlob@ caller)
 {
-	if (caller.getTeamNum() != 250 && !this.hasTag("opened"))
+	if (caller.getTeamNum() != 250 && !this.hasTag("opened") && caller.get_u8("deity_id") != Deity::foghorn)
 	{
-		caller.CreateGenericButton("$chest_open$", Vec2f(0, 0), this, this.getCommandID("chest_open"), "Open");
+		CButton@ button = caller.CreateGenericButton("$chest_open$", Vec2f(0, 0), this, this.getCommandID("chest_open"), "Open");
 	}
 }
 
@@ -80,7 +82,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
 	if (cmd == this.getCommandID("chest_open"))
 	{
-		if (getNet().isServer())
+		if (isServer())
 		{
 			this.server_Die();
 		}
@@ -90,7 +92,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 void onDie(CBlob@ this)
 {
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		if (this.hasTag("opened")) return;
 

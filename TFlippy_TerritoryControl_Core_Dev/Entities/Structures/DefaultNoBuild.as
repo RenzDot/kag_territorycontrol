@@ -48,7 +48,7 @@ void onTick(CBlob@ this)
 
 		if (this.exists(back))
 		{
-			AddTilesBySector(ul, lr, "no build", this.get_TileType(back), CMap::tile_castle_back);
+			AddTilesBySectorSoft(ul, lr, "no build", this.get_TileType(back));
 		}
 		else
 			this.getCurrentScript().runFlags |= Script::remove_after_this;
@@ -56,7 +56,7 @@ void onTick(CBlob@ this)
 		this.getCurrentScript().tickFrequency = CHECK_FREQ;
 	}
 	else // check for collapse
-		if (getNet().isServer())
+		if (isServer())
 		{
 			Vec2f ul, lr;
 			this.getShape().getBoundingRect(ul, lr);

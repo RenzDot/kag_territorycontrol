@@ -6,7 +6,7 @@ void onInit(CSprite@ this)
 {
     this.ReloadSprites(0,0);
 	this.SetZ(-20.0f);
-	this.addSpriteLayer("isOnScreen","NoTexture.png",0,0);
+	this.addSpriteLayer("isOnScreen","NoTexture.png",1,1);
 }
 
 void onTick(CSprite@ this)
@@ -75,6 +75,8 @@ void onInit(CBlob@ this)
 	this.set_u8("number of steaks", 2);
 	this.set_u32("next meow", getGameTime());
 	this.set_u32("next screech", getGameTime());
+	
+	if (!this.exists("voice_pitch")) this.set_f32("voice pitch", 1.70f);
 }
 
 void onTick(CBlob@ this)
@@ -118,8 +120,8 @@ void onTick(CBlob@ this)
 			{
 				if (this.getTickSinceCreated() % 10 == 0)
 				{
-					if (getNet().isServer()) this.server_Hit(inventoryBlob, inventoryBlob.getPosition(), Vec2f(0, 0), 0.15f, Hitters::bite, true);
-					if (getNet().isClient()) 
+					if (isServer()) this.server_Hit(inventoryBlob, inventoryBlob.getPosition(), Vec2f(0, 0), 0.15f, Hitters::bite, true);
+					if (isClient()) 
 					{
 						if (XORRandom(3) == 0) 
 						{	

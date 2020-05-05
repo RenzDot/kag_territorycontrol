@@ -4,6 +4,7 @@
 #include "HittersTC.as";
 #include "Knocked.as";
 #include "VehicleAttachmentCommon.as"
+#include "DeityCommon.as"
 
 const f32 radius = 128.0f;
 const f32 damage = 5.00f;
@@ -26,7 +27,7 @@ void onInit(CBlob@ this)
 	// this.SetLightRadius(48.0f);
 	// this.SetLightColor(SColor(255, 255, 0, 0));
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		if (this.getTeamNum() == 250)
 		{
@@ -78,7 +79,7 @@ bool isInventoryAccessible(CBlob@ this, CBlob@ forBlob)
 	if (this.getTeamNum() != forBlob.getTeamNum()) return false;
 
 	CBlob@ carried = forBlob.getCarriedBlob();
-	return (carried is null ? true : carried.getConfig() == "mat_gatlingammo");
+	return (carried is null ? true : carried.getName() == "mat_gatlingammo");
 }
 
 u8 GetAmmo(CBlob@ this)
@@ -133,6 +134,7 @@ void onTick(CBlob@ this)
 			
 			f32 dist = (b.getPosition() - this.getPosition()).LengthSquared();
 			
+			if (myTeam == 250 && b.get_u8("deity_id") == Deity::foghorn) continue;
 			if (team != myTeam && dist < s_dist && b.hasTag("flesh") && !b.hasTag("dead") && isVisible(this, b))
 			{
 				s_dist = dist;
@@ -180,14 +182,14 @@ void onTick(CBlob@ this)
 				this.set_u32("next_shoot", getGameTime() + 2);
 				SetAmmo(this, ammo - 1);
 			
-				if (getNet().isServer())
+				if (isServer())
 				{
 					this.server_Hit(t, t.getPosition(), Vec2f(0, 0), 0.50f, HittersTC::bullet_high_cal, true);
 				}
 			}
 		}
 		
-		if (getNet().isClient())
+		if (isClient())
 		{
 			CSpriteLayer@ laser = this.getSprite().getSpriteLayer("laser");
 			if (laser !is null)
@@ -227,7 +229,7 @@ void onTick(CSprite@ this)
 	CBlob@ blob = this.getBlob();
 	if (blob.get_bool("security_state"))
 	{
-		if (getNet().isClient())
+		if (isClient())
 		{					
 			CBlob@ target = getBlobByNetworkID(blob.get_u16("target"));
 			if (target !is null)

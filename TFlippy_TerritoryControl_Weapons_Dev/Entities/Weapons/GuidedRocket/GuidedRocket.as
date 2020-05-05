@@ -76,7 +76,7 @@ void onTick(CBlob@ this)
 					dir = Vec2f(0, -1);
 				}
 				
-				if (getNet().isServer())
+				if (isServer())
 				{
 					if (distance < 8) this.server_Die();
 				}
@@ -153,17 +153,17 @@ void DoExplosion(CBlob@ this)
 
 void MakeExplosionParticle(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
+	if (!isClient()) return;
 
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(8), 0, true);
+	ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(8), 0, true);
 }
 
 void MakeParticle(CBlob@ this, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
+	if (!isClient()) return;
 
 	Vec2f offset = Vec2f(0, 16).RotateBy(this.getAngleDegrees());
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + offset, vel, float(XORRandom(360)), 1.0f, 2 + XORRandom(3), -0.1f, false);
+	ParticleAnimated(filename, this.getPosition() + offset, vel, float(XORRandom(360)), 1.0f, 2 + XORRandom(3), -0.1f, false);
 }
 
 void onDie(CBlob@ this)
@@ -176,7 +176,7 @@ void onCollision(CBlob@ this, CBlob@ blob, bool solid)
 {
 	// if ((blob !is null ? !blob.isCollidable() : !solid)) return;
 	
-	if (getNet().isServer() && this.hasTag("offblast") && this.get_u32("no_explosion_timer") < getGameTime()) this.server_Die();
+	if (isServer() && this.hasTag("offblast") && this.get_u32("no_explosion_timer") < getGameTime()) this.server_Die();
 }
 
 void GetButtonsFor(CBlob@ this, CBlob@ caller)

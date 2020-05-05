@@ -9,8 +9,8 @@
 
 void onInit(CBlob@ this)
 {
-	this.getSprite().addSpriteLayer("isOnScreen", "NoTexture.png", 0, 0);
-	this.set_f32("gib health", -20.00f);
+	this.getSprite().addSpriteLayer("isOnScreen","NoTexture.png",1,1);
+	this.set_f32("gib health", 0.0f);
 	this.set_u32("nextAttack", 0);
 	this.set_u32("nextBomb", 0);
 	
@@ -36,7 +36,7 @@ void onInit(CBlob@ this)
 	
 	this.set_f32("voice pitch", 1.25f);
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		this.set_u16("stolen coins", 400);
 	
@@ -177,7 +177,7 @@ void onTick(CBlob@ this)
 		this.Tag("dead");
 		this.getSprite().PlaySound("Wilhelm.ogg", 1.8f, 1.8f);
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			this.server_SetPlayer(null);
 			server_DropCoins(this.getPosition(), Maths::Max(0, Maths::Min(this.get_u16("stolen coins"), 5000)));
@@ -192,7 +192,7 @@ void onTick(CBlob@ this)
 		this.getCurrentScript().runFlags |= Script::remove_after_this;
 	}
 
-	if (getNet().isClient())
+	if (isClient())
 	{
 		if (getGameTime() > this.get_u32("next sound") && XORRandom(100) < 5)
 		{
@@ -204,7 +204,7 @@ void onTick(CBlob@ this)
 
 f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData)
 {
-	if (getNet().isClient())
+	if (isClient())
 	{
 		if (getGameTime() > this.get_u32("next sound") - 50)
 		{
@@ -213,7 +213,7 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 		}
 	}
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBrain@ brain = this.getBrain();
 		

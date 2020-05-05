@@ -132,8 +132,8 @@ void onTick(CBlob@ this)
 			
 			if ((blob.hasTag("weapon") || blob.hasTag("ammo")) && !blob.isAttached())
 			{
-				if (getNet().isClient() && this.getInventory().canPutItem(blob)) blob.getSprite().PlaySound("/PutInInventory.ogg");
-				if (getNet().isServer()) this.server_PutInInventory(blob);
+				if (isClient() && this.getInventory().canPutItem(blob)) blob.getSprite().PlaySound("/PutInInventory.ogg");
+				if (isServer()) this.server_PutInInventory(blob);
 			}
 		}
 	}
@@ -177,7 +177,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		
 		if (callerBlob is null) return;
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			string[] spl = name.split("-");
 			

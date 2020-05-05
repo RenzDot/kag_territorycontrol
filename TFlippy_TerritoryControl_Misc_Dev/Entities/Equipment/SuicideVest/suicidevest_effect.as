@@ -90,7 +90,7 @@ void onTick(CBlob@ this)
 			moveVars.jumpFactor *= 1.20f;
 		}
 	
-		if (getNet().isServer() && getGameTime() >= this.get_u32("vest_explode")) this.server_Die();
+		if (isServer() && getGameTime() >= this.get_u32("vest_explode")) this.server_Die();
 	}
 }
 
@@ -132,12 +132,12 @@ void DoExplosion(CBlob@ this)
 	}
 	
 	
-	// if (getNet().isServer()) this.server_Die();
+	// if (isServer()) this.server_Die();
 }
 
 void MakeParticle(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
+	if (!isClient()) return;
 
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(4), XORRandom(100) * -0.00005f, true);
+	ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(4), XORRandom(100) * -0.00005f, true);
 }

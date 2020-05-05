@@ -1,5 +1,6 @@
 //bf_piglet
 #include "AnimalConsts.as";
+#include "Knocked.as";
 
 //sprite
 void onInit(CSprite@ this)
@@ -71,6 +72,8 @@ void onInit(CBlob@ this)
 	this.set_u8("number of steaks", 2);
 	this.set_u32("next oink", getGameTime());
 	this.set_u32("next squeal", getGameTime());
+	
+	if (!this.exists("voice_pitch")) this.set_f32("voice pitch", 1.50f);
 }
 
 void onTick(CBlob@ this)
@@ -135,7 +138,7 @@ void onCollision(CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f point
 	{
 		
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			CBlob@ bagel = server_CreateBlob("pigger", this.getTeamNum(), this.getPosition());
 			this.server_Die();

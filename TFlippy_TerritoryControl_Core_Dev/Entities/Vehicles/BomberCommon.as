@@ -87,7 +87,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		
 		if (carried !is null)
 		{
-			string fuel_name = carried.getConfig();
+			string fuel_name = carried.getName();
 			f32 fuel_modifier = 1.00f;
 			bool isValid = false;
 			
@@ -106,6 +106,11 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 				fuel_modifier = 3.00f * 5.00f;
 				isValid = true;
 			}
+			else if (fuel_name == "mat_methane")
+			{
+				fuel_modifier = 15.00f;
+				isValid = true;
+			}
 			else if (fuel_name == "mat_fuel")
 			{
 				fuel_modifier = 100.00f;
@@ -116,10 +121,11 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			{
 				u16 remain = GiveFuel(this, carried.getQuantity(), fuel_modifier);
 					
-				if (getNet().isServer())
+				if (isServer())
 				{
 					if (remain == 0)
 					{
+						carried.Tag("dead");
 						carried.server_Die();
 					}
 					else
@@ -177,7 +183,7 @@ void drawFuelCount(CBlob@ this)
 	f32 fuel = this.get_f32("fuel_count");
 	string reqsText = "Fuel: " + fuel + " / " + this.get_f32("max_fuel");
 
-	u8 numDigits = reqsText.length() - 1;
+	u8 numDigits = reqsText.size() - 1;
 
 	upperleft -= Vec2f((float(numDigits) * 4.0f), 0);
 	lowerright += Vec2f((float(numDigits) * 4.0f), 18);
@@ -211,7 +217,7 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 	CBlob@ carried = caller.getCarriedBlob();
 	if (carried !is null && this.get_f32("fuel_count") < this.get_f32("max_fuel"))
 	{
-		string fuel_name = carried.getConfig();
+		string fuel_name = carried.getName();
 		bool isValid = fuel_name == "mat_wood" || fuel_name == "mat_coal" || fuel_name == "mat_oil" || fuel_name == "mat_fuel";
 		
 		if (isValid)
@@ -285,7 +291,7 @@ void BomberHandling(CBlob@ this,VehicleInfo@ v)
 			if(inv !is null) {
 				u32 itemCount=	inv.getItemsCount();
 				
-				if(getNet().isClient()) {
+				if(isClient()) {
 					if(itemCount>0){ 
 						this.getSprite().PlaySound("bridge_open",1.0f,1.0f);
 					}else if(blob !is null && blob.isMyPlayer()){
@@ -293,7 +299,7 @@ void BomberHandling(CBlob@ this,VehicleInfo@ v)
 					}
 				}
 				if(itemCount>0) {
-					if(getNet().isServer()) {
+					if(isServer()) {
 						CBlob@ item=	inv.getItem(0);
 						u32 quantity=	item.getQuantity();
 
@@ -375,7 +381,7 @@ void onCollision(CBlob@ this,CBlob@ blob,bool solid)
 {
 	float power=this.getOldVelocity().getLength();
 	if(power>1.5f &&(solid ||(blob !is null && blob.isCollidable() && blob.getTeamNum()!=this.getTeamNum() && this.doesCollideWithBlob(blob)))){
-		if(getNet().isClient()){
+		if(isClient()){
 			Sound::Play("WoodHeavyHit1.ogg",this.getPosition(),1.0f);
 		}
 		this.server_Hit(this,this.getPosition(),Vec2f(0,0),this.getAttachments().getAttachmentPointByName("FLYER") is null ? power*2.5f : power*0.6f,0,true);
@@ -390,12 +396,16 @@ void onDie( CBlob@ this )
 	// getBlobsByName("mat_bigbomb",		@explosives);
 	// getBlobsByName("mat_incendiarybomb",@explosives);
 	getBlobsByTag("explosive",@explosives);
-	
-	for(int i=0;i<explosives.length();i++){
-		float distance=(explosives[i].getPosition()-this.getPosition()).Length();
+	int eploSize = explosives.size();
+
+	for (int i=0;i<eploSize; i++){
+		CBlob@ b = explosives[i];
+
+		float distance=(b.getPosition()-this.getPosition()).Length();
+		
 		if(distance<1.0f){
-			explosives[i].Tag("DoExplode");
-			explosives[i].server_Die();
+			b.Tag("DoExplode");
+			b.server_Die();
 		}
 	}
 	

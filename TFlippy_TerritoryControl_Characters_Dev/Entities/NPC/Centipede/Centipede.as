@@ -12,7 +12,7 @@
 
 void onInit( CBrain@ this )
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		InitBrain( this );
 		this.server_SetActive( true ); // always running
@@ -46,13 +46,13 @@ void onInit(CBlob@ this)
 	
 	this.getCurrentScript().tickFrequency = 1;
 	
-	if (getNet().isClient())
+	if (isClient())
 	{
 		client_AddToChat("A Centipede has arrived!", SColor(255, 255, 0, 0));
 		Sound::Play("scyther-intro.ogg");
 	}
 	
-	if (getNet().isServer())
+	if (isServer())
 	{	
 		for (int i = 0; i < 2; i++)
 		{
@@ -86,7 +86,7 @@ void onTick(CBlob@ this)
 	
 	// print("t");
 
-	if (getNet().isClient())
+	if (isClient())
 	{
 		if (getGameTime() > this.get_u32("next sound"))
 		{
@@ -185,7 +185,7 @@ void onTick(CBrain@ this)
 		Vec2f tpos = target.getPosition() - blob.getPosition();
 		blob.SetFacingLeft(tpos.x < 0);
 		
-		// print("" + target.getConfig());
+		// print("" + target.getName());
 		
 		// print("" + distance);
 		
@@ -253,7 +253,7 @@ void Move(CBrain@ this, CBlob@ blob, Vec2f pos)
 
 f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData)
 {
-	if (getNet().isClient())
+	if (isClient())
 	{
 		if (getGameTime() > this.get_u32("next sound") - 50)
 		{
@@ -262,7 +262,7 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 		}
 	}
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBrain@ brain = this.getBrain();
 		if (brain !is null && hitterBlob !is null && (hitterBlob.hasTag("flesh") || hitterBlob.hasTag("npc")) && hitterBlob !is this)
@@ -276,7 +276,7 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 
 void onDie(CBlob@ this)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBlob@ boom = server_CreateBlobNoInit("nukeexplosion");
 		boom.setPosition(this.getPosition());

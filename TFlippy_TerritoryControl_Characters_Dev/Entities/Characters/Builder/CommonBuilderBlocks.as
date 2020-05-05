@@ -80,6 +80,7 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 	AddIconToken("$concrete_block$", "World.png", Vec2f(8, 8), CMap::tile_concrete);
 	AddIconToken("$bconcrete_block$", "World.png", Vec2f(8, 8), CMap::tile_bconcrete);
 	AddIconToken("$reinforcedconcrete_block$", "World.png", Vec2f(8, 8), CMap::tile_reinforcedconcrete);
+	AddIconToken("$patreonshop$", "PatreonShop.png", Vec2f(40, 40), 0);
 	
 	AddIconToken("$icon_conveyor$", "Conveyor.png", Vec2f(8, 8), 0);
 	AddIconToken("$icon_separator$", "Seperator.png", Vec2f(8, 8), 0);
@@ -98,7 +99,7 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 	AddIconToken("$icon_inserter$", "Inserter.png", Vec2f(16, 16), 0);
 	AddIconToken("$icon_floater$", "Floater.png", Vec2f(24, 24), 0);
 	AddIconToken("$icon_treecapitator$", "Treecapitator.png", Vec2f(24, 8), 0);	
-	AddIconToken("$icon_mithrilbreeder$", "MithrilBreeder.png", Vec2f(24, 24), 0);	
+	AddIconToken("$icon_mithrilreactor$", "MithrilReactor.png", Vec2f(24, 24), 0);	
 	AddIconToken("$icon_metaldetector$", "MetalDetector.png", Vec2f(24, 24), 0);	
 	AddIconToken("$icon_chickenassembler$", "ChickenAssembler.png", Vec2f(56, 24), 0);
 	AddIconToken("$icon_securitystation$", "SecurityStation.png", Vec2f(24, 24), 0);	
@@ -107,6 +108,9 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 	AddIconToken("$icon_beamtowermirror$", "BeamTowerMirror.png", Vec2f(16, 24), 0);	
 	
 	AddIconToken("$icon_1x5blastdoor$", "1x5BlastDoor.png", Vec2f(8, 40), 0);
+	AddIconToken("$icon_barricade$", "Barricade.png", Vec2f(8, 24), 0);
+	
+	AddIconToken("$icon_altar$", "Altar.png", Vec2f(24, 32), 0);
 	
 	AddIconToken("$markettable$", "MarketTable.png", Vec2f(16, 16), 3);
 	AddIconToken("$constructionyard$", "ConstructionYardIcon.png", Vec2f(16, 16), 0);
@@ -374,6 +378,16 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 		AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 100);
 		b.buildOnGround = true;
 		b.size.Set(40, 24);
+		blocks[1].push_back(b);
+	}
+	{
+		BuildBlock b(0, "patreonshop", "$patreonshop$", "Gift Shop\nA special souvenir shop for\nVamistorio's Patreon supporters.\n\nUsable by anyone once built.");
+		AddRequirement(b.reqs, "blob", "mat_stone", "Stone", 75);
+		AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 200);
+		AddRequirement(b.reqs, "coin", "", "Coins", 500);
+		AddRequirement(b.reqs, "seclev feature", "patreon", "Patreon", 1);
+		b.buildOnGround = true;
+		b.size.Set(40, 40);
 		blocks[1].push_back(b);
 	}
 	{
@@ -654,7 +668,7 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 		blocks[3].push_back(b);
 	}	
 	{
-		BuildBlock b(0, "banner", "$icon_banner$", "Clan Banner\nIf your in a TC Clan, the clan banner will appear");
+		BuildBlock b(0, "banner", "$icon_banner$", "Clan Banner\nSpecial banner for those who are in a clan.");
 		AddRequirement(b.reqs, "coin", "", "Coins", 150);
 		b.size.Set(16, 32);
 		blocks[3].push_back(b);
@@ -666,7 +680,7 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 		blocks[3].push_back(b);
 	}
 	{
-		BuildBlock b(0, "mithrilbreeder", "$icon_mithrilbreeder$", "Mithril Reactor\nA small reactor used for mithril enrichment and synthesis using gold.\nBecomes more stable when submerged in deep water.\nCareless usage may result in an irradiated crater.");
+		BuildBlock b(0, "mithrilreactor", "$icon_mithrilreactor$", "Mithril Reactor\nA small reactor used for mithril enrichment and synthesis using gold.\nBecomes more stable when submerged in deep water.\nCareless usage may result in an irradiated crater.");
 		AddRequirement(b.reqs, "blob", "mat_steelingot", "Steel Ingot", 20);
 		AddRequirement(b.reqs, "blob", "mat_mithril", "Mithril", 100);
 		AddRequirement(b.reqs, "blob", "mat_mithrilingot", "Mithril Ingot", 5);
@@ -707,6 +721,23 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 		AddRequirement(b.reqs, "blob", "mat_copperwire", "Copper Wire", 2);
 		blocks[3].push_back(b);
 	}
+	
+	{
+		BuildBlock b(0, "altar", "$icon_altar$", "Altar\nWorship your idols here. Needs to be carved first.");
+		AddRequirement(b.reqs, "blob", "mat_stone", "Stone", 2000);
+		AddRequirement(b.reqs, "coin", "", "Coins", 250);
+		b.buildOnGround = true;
+		b.size.Set(24, 32);
+		blocks[3].push_back(b);
+	}	
+	
+	// {
+		// BuildBlock b(0, "barricade", "$icon_barricade$", "Barricade\neee");
+		// AddRequirement(b.reqs, "blob", "mat_concrete", "Concrete", 100);
+		// AddRequirement(b.reqs, "blob", "mat_steelingot", "Steel Ingot", 10);
+		// b.size.Set(8, 24);
+		// blocks[3].push_back(b);
+	// }
 
 
 	

@@ -37,7 +37,15 @@ void onInit(CBlob@ this)
 	
 	// this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right | CBlob::map_collide_up | CBlob::map_collide_down);
 	this.SetMapEdgeFlags(CBlob::map_collide_sides);
-	this.getCurrentScript().tickFrequency = 90;
+	if(isClient())
+	{
+		this.getCurrentScript().tickFrequency = 2;
+		this.getCurrentScript().runFlags |= Script::tick_onscreen;
+	}
+	else // its like this for localhost, so we can still see it
+	{
+		this.getCurrentScript().tickFrequency = 90;
+	}
 
 	this.getSprite().RotateBy(90 * XORRandom(4), Vec2f());
 
@@ -46,7 +54,23 @@ void onInit(CBlob@ this)
 
 void onTick(CBlob@ this)
 {
-	if (getNet().isServer())
+	if(isClient())
+	{
+		CParticle@ particle = ParticleAnimated("Coal.png", this.getPosition(), Vec2f(), 1.0f, 1, 6, 0.0f, false);
+		if (particle !is null) 
+		{
+			particle.frame = XORRandom(7);
+			particle.collides = false;
+			particle.deadeffect = 1;
+			particle.bounce = 0.0f;
+			particle.fastcollision = true;
+			particle.lighting = false;
+		}
+
+		return; // now we dont need to run the isServer() :)
+	}
+
+	if (isServer())
 	{
 		if (this.getPosition().y < 0) 
 		{
@@ -59,6 +83,7 @@ void onTick(CBlob@ this)
 			blob.server_SetQuantity(1 + XORRandom(6));
 		}
 	}
+
 }
 
 void DoExplosion(CBlob@ this)
@@ -73,7 +98,7 @@ void DoExplosion(CBlob@ this)
 	Vec2f pos = this.getPosition();
 	CMap@ map = getMap();
 		
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBlob@[] blobs;
 		
@@ -91,7 +116,7 @@ void DoExplosion(CBlob@ this)
 		}
 	}	
 	
-	if (getNet().isClient())
+	if (isClient())
 	{
 		// this.getSprite().PlaySound("shockmine_explode.ogg", 0.80f, 1.10f);
 		ShakeScreen(100, 60, this.getPosition());
@@ -145,7 +170,7 @@ void onCollision(CBlob@ this, CBlob@ blob, bool solid)
 	if (blob is null) return;
 	if (blob.hasTag("gas")) return;
 
-	if ((blob.getConfig() == "lantern" ? blob.isLight() : false) || blob.getConfig() == "fireplace" || (blob.getConfig() == "arrow" && blob.get_u8("arrow type") == ArrowType::fire))
+	if ((blob.getName() == "lantern" ? blob.isLight() : false) || blob.getName() == "fireplace" || (blob.getName() == "arrow" && blob.get_u8("arrow type") == ArrowType::fire))
 	{
 		this.Tag("lit");
 		this.server_Die();
@@ -154,8 +179,8 @@ void onCollision(CBlob@ this, CBlob@ blob, bool solid)
 
 void MakeParticle(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
-	CParticle@ p = ParticleAnimated(CFileMatcher(filename).getFirst(), pos, vel, XORRandom(360), 1 + (XORRandom(100) * 0.02f), 2 + XORRandom(5), 0, true);
+	if (!isClient()) return;
+	CParticle@ p = ParticleAnimated(filename, pos, vel, XORRandom(360), 1 + (XORRandom(100) * 0.02f), 2 + XORRandom(5), 0, true);
 	if(p !is null)
 	{
 		p.fastcollision = true;

@@ -173,7 +173,7 @@ void onTick(CBlob@ this)
 		
 	this.SetLight(pressed_a1);
 		
-	// if (getNet().isServer() && time % 90 == 0) this.server_Heal(0.25f); // OP
+	// if (isServer() && time % 90 == 0) this.server_Heal(0.25f); // OP
 		
 	if (knocked > 0)
 	{
@@ -200,7 +200,7 @@ void onTick(CBlob@ this)
 		this.setPosition(hitPos);
 		this.setVelocity(-aimDir * (length / 12.0f));
 	
-		if(getNet().isClient())
+		if(isClient())
 		{
 			this.getSprite().PlaySound("Exosuit_Teleport.ogg", 1.0f, 1.0f);
 			this.getSprite().setRenderStyle(RenderStyle::additive);
@@ -209,7 +209,7 @@ void onTick(CBlob@ this)
 			ShakeScreen(64, 32, this.getPosition());	
 		}
 		
-		if(getNet().isServer())
+		if(isServer())
 		{
 			map.server_DestroyTile(hitPos, 32.0f);
 			map.server_DestroyTile(hitPos + aimDir * -8, 16.0f);
@@ -351,12 +351,12 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 		SetKnocked(hitterBlob, 30.0f * damage_reflected);
 		SetKnocked(this, 30.0f * damage_reflected);
 	
-		if (getNet().isServer())
+		if (isServer())
 		{
 			this.server_Hit(hitterBlob, worldPoint, velocity, damage_reflected, customData);
 		}
 	
-		if (getNet().isClient())
+		if (isClient())
 		{
 			this.getSprite().PlaySound("Exosuit_Deflect.ogg", 1, 1);
 			if (this.isMyPlayer()) SetScreenFlash(100, 255, 255, 255);			
@@ -372,5 +372,5 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 
 void onDie(CBlob@ this)
 {
-	if (getNet().isServer()) server_CreateBlob("exosuititem", this.getTeamNum(), this.getPosition());
+	if (isServer()) server_CreateBlob("exosuititem", this.getTeamNum(), this.getPosition());
 }

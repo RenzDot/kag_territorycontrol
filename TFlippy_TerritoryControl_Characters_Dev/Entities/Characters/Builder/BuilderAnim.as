@@ -31,7 +31,15 @@ void LoadSprites(CSprite@ this)
 	if(p !is null)
 	{
 		armour = p.getArmourSet();
-		if(IsCool(p.getUsername()))
+
+		bool patreon = true;
+		CSecurity@ security = getSecurity();
+		if (!(security.checkAccess_Feature(p, "patreon")))
+		{
+			patreon = false;
+		}
+
+		if(IsCool(p.getUsername()) || patreon)
 		{
 			ensureCorrectRunnerTexture(this, "builder_cape", "BuilderCape");
 			return;
@@ -55,6 +63,7 @@ void onTick(CSprite@ this)
 {
 	// store some vars for ease and speed
 	CBlob@ blob = this.getBlob();
+	if (blob is null) return;
 
 	if (blob.hasTag("dead"))
 	{

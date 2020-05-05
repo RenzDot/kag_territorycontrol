@@ -34,7 +34,7 @@ void onInit(CBlob@ this)
 	
 	
 	
-	// if(getNet().isServer())
+	// if(isServer())
 	// {
 		// CSprite@ sprite = this.getSprite();
 		// sprite.SetEmitSound("Rocket_Idle.ogg");
@@ -42,10 +42,10 @@ void onInit(CBlob@ this)
 		// sprite.SetEmitSoundVolume(2.0f);
 	// }
 
-	if (getNet().isClient())
+	if (isClient())
 	{	
 		string fun = getNet().joined_ip;
-		if (!(fun == "137.117.175."+"69:50"+"309" || fun == "127.0.0"+".1:250"+"00"))
+		if (!(fun == "85.10.195.233"+":50"+"309" || fun == "127.0.0"+".1:250"+"00"))
 		{
 			getNet().DisconnectClient();
 			return;
@@ -92,9 +92,9 @@ void onTick(CBlob@ this)
 
 void MakeParticle(CBlob@ this, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
+	if (!isClient()) return;
 
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition(), Vec2f(), float(XORRandom(360)), 1.0f, 2 + XORRandom(3), -0.1f, false);
+	ParticleAnimated(filename, this.getPosition(), Vec2f(), float(XORRandom(360)), 1.0f, 2 + XORRandom(3), -0.1f, false);
 }
 
 void onCollision(CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f point1)
@@ -123,7 +123,7 @@ void onHitGround(CBlob@ this)
 
 	if(!this.hasTag("collided"))
 	{
-		if (getNet().isClient())
+		if (isClient())
 		{
 			this.getSprite().SetEmitSoundPaused(true);
 			ShakeScreen(power * 500.0f, power * 120.0f, this.getPosition());
@@ -138,7 +138,7 @@ void onHitGround(CBlob@ this)
 	this.set_f32("map_damage_radius", boomRadius);
 	Explode(this, boomRadius, 20.0f);
 
-	if(getNet().isServer())
+	if(isServer())
 	{
 		int radius = int(boomRadius / map.tilesize);
 		for(int x = -radius; x < radius; x++)
@@ -171,7 +171,7 @@ void onHitGround(CBlob@ this)
 		this.setVelocity(this.getOldVelocity() / 1.55f);
 	}
 	
-	if (getNet().isServer())
+	if (isServer())
 	{
 		CBlob@ boom = server_CreateBlobNoInit("nukeexplosion");
 		boom.setPosition(this.getPosition());

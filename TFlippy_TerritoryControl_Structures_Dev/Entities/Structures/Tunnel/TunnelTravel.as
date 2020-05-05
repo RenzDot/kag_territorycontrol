@@ -137,14 +137,14 @@ void Travel(CBlob@ this, CBlob@ caller, Vec2f position)
 				{
 					occBlob.setPosition(position);
 					occBlob.setVelocity(Vec2f_zero);
-					occBlob.getShape().PutOnGround();
+					//occBlob.getShape().PutOnGround();
 				}
 			}
 		}
 		// move caller
 		caller.setPosition(position);
 		caller.setVelocity(Vec2f_zero);
-		caller.getShape().PutOnGround();
+		//caller.getShape().PutOnGround();
 
 		if (caller.isMyPlayer())
 		{
@@ -188,7 +188,7 @@ void onTunnelCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		        && (this.getPosition() - caller.getPosition()).getLength() < (this.getRadius() + caller.getRadius()) * 2.0f &&
 		        doesFitAtTunnel(this, caller, tunnel))
 		{
-			if (getNet().isServer())
+			if (isServer())
 			{
 				CBitStream params;
 				params.write_u16(caller.getNetworkID());

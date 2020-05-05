@@ -1,22 +1,3 @@
-void HandleCustomTile( CMap@ map, int offset, SColor pixel )
-{
-	// print("custom");
-
-	// if (pixel == color_goo)
-	// {
-		// map.SetTile(offset, CMap::tile_goo );
-		// map.AddTileFlag( offset, Tile::SOLID | Tile::COLLISION );
-
-		// //map.AddTileFlag( offset, Tile::BACKGROUND );
-		// //map.AddTileFlag( offset, Tile::LADDER );
-		// //map.AddTileFlag( offset, Tile::LIGHT_PASSES );
-		// //map.AddTileFlag( offset, Tile::WATER_PASSES );
-		// //map.AddTileFlag( offset, Tile::FLAMMABLE );
-		// //map.AddTileFlag( offset, Tile::PLATFORM );
-		// //map.AddTileFlag( offset, Tile::LIGHT_SOURCE );
-	// }
-}
-
 namespace CMap
 {
 	enum CustomTiles
@@ -255,6 +236,26 @@ namespace CMap
 		tile_mossybconcrete_d2,
 		tile_mossybconcrete_d3,
 		tile_mossybconcrete_d4,
+		
+		tile_snow = tile_bconcrete_d0 + 16,
+		tile_snow_v0,
+		tile_snow_v1,
+		tile_snow_v2,
+		tile_snow_v3,
+		tile_snow_v4,
+		tile_snow_v5,
+		tile_snow_d0,
+		tile_snow_d1,
+		tile_snow_d2,
+		tile_snow_d3,
+
+		tile_snow_pile = tile_snow + 16,
+		tile_snow_pile_v0,
+		tile_snow_pile_v1,
+		tile_snow_pile_v2,
+		tile_snow_pile_v3,
+		tile_snow_pile_v4,
+		tile_snow_pile_v5
 	};
 };
 
@@ -293,14 +294,34 @@ bool isTileMossyBConcrete(TileType tile)
 	return tile >= CMap::tile_mossybconcrete && tile <= CMap::tile_mossybconcrete_d4;
 }
 
-void onInit(CMap@ this)
+bool isTileGlass(TileType tile)
 {
-    this.legacyTileMinimap = false;
-	if(isServer()){
-    	this.MakeMiniMap();
-	}
-	
-	CRules@ rules = getRules();
-	rules.addCommandID("add_tile");
-	rules.addCommandID("remove_tile");
+	return tile >= CMap::tile_glass && tile <= CMap::tile_glass_d0;
 }
+
+bool isTileBGlass(TileType tile)
+{
+	return tile >= CMap::tile_bglass && tile <= CMap::tile_bglass_d0;
+}
+
+bool isTileSnow(TileType tile)
+{
+	return tile >= CMap::tile_snow && tile <= CMap::tile_snow_d3;
+}
+
+bool isTileSnowPile(TileType tile)
+{
+	return tile >= CMap::tile_snow_pile && tile <= CMap::tile_snow_pile_v5;
+}
+
+// void onInit(CMap@ this)
+// {
+    // this.legacyTileMinimap = false;
+	// if(isServer()){
+    	// this.MakeMiniMap();
+	// }
+	
+	// CRules@ rules = getRules();
+	// rules.addCommandID("add_tile");
+	// rules.addCommandID("remove_tile");
+// }

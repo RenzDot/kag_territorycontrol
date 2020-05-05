@@ -22,39 +22,26 @@ void onInit(CBlob@ this)
 	
 	this.server_SetTimeToDie((30 * 60 * 5) + XORRandom(30 * 60 * 15));
 	
-	this.SetLight(true);
-	this.SetLightRadius(48.0f);
-	this.SetLightColor(SColor(200, 25, 255, 100));
-	
-	// this.getCurrentScript().runFlags |= Script::tick_not_inwater | Script::tick_not_ininventory;
+	if (isClient())
+	{
+		this.getCurrentScript().runFlags |= Script::tick_onscreen;
+	}
 }
 
 void onTick(CBlob@ this)
 {
-	
-
-	if(isClient())
+	if (isClient())
 	{
 		MakeParticle(this, "FalloutGas.png");
 	}
-	else
-	{
-		if(this.getPosition().y < 0) {this.server_Die();}
-		f32 radius = 128;
 
-	// SetScreenFlash(240, 16, 40, 8);	
-	
-	// this.AddForce(getRandomVelocity(0, 100, 360));
-		
+	if (isServer())
+	{
 		if (XORRandom(100) < 20) 
 		{
+			f32 radius = 128;
 			
 			CMap@ map = getMap();
-			
-
-			// f32 x = this.getPosition().x + XORRandom(radius * 2) - radius;
-			// f32 y = (map.getLandYAtX(x / 8) - 1) * 8;
-		
 			Vec2f pos = this.getPosition() + getRandomVelocity(0, XORRandom(radius), 360);
 		
 			TileType t = map.getTile(pos).type;
@@ -74,16 +61,14 @@ void onTick(CBlob@ this)
 					CBlob@ blob = blobsInRadius[i];
 					if ((blob.hasTag("flesh") || blob.hasTag("nature")) && !blob.hasTag("dead"))
 					{
-						Vec2f pos = this.getPosition();
 						this.server_Hit(blob, blob.getPosition(), Vec2f(0, 0), 0.0625f, HittersTC::radiation, true);
 					}
 				}
 			}
-			
 		}
+		
+		if (this.getPosition().y < 0) this.server_Die();
 	}
-
-	
 }
 
 f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData)
@@ -93,22 +78,16 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 
 void MakeParticle(CBlob@ this, const string filename = "LargeSmoke")
 {
-	if (!getNet().isClient()) return;
-	CParticle@ particle = ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + Vec2f(XORRandom(1000) / 10.0f - 50.0f, -XORRandom(600) / 10.0f + 20.0f), Vec2f(), float(XORRandom(360)), 2.0f + (XORRandom(150) / 100.0f), 4, 0.00f, false);
-	if (particle !is null) 
+	if (isClient())
 	{
-		particle.fastcollision = true;
-		particle.setRenderStyle(RenderStyle::additive);
+		CParticle@ particle = ParticleAnimated(filename, this.getPosition() + Vec2f(XORRandom(1000) / 10.0f - 50.0f, -XORRandom(600) / 10.0f + 20.0f), Vec2f(), float(XORRandom(360)), 2.0f + (XORRandom(150) / 100.0f), 4, 0.00f, false);
+		if (particle !is null) 
+		{
+			particle.fastcollision = true;
+			particle.lighting = false;
+			particle.setRenderStyle(RenderStyle::additive);
+		}
 	}
-	
-	// normal
-	// light
-	// outline
-	// outline_front
-	// additive
-	// subtractive
-	// shadow
-	// solid
 }
 
 bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)

@@ -119,7 +119,7 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 
 void onCollision(CBlob@ this, CBlob@ blob, bool solid)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		if (blob !is null && doesCollideWithBlob(this, blob)) this.server_Die();
 		else if (solid) this.server_Die();
@@ -168,6 +168,6 @@ void DoExplosion(CBlob@ this)
 
 void MakeParticle(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(4), XORRandom(100) * -0.00005f, true);
+	if (!isClient()) return;
+	ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(4), XORRandom(100) * -0.00005f, true);
 }

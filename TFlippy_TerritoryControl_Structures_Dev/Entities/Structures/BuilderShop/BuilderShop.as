@@ -55,12 +55,12 @@ void onInit(CBlob@ this)
 		
 		s.spawnNothing = true;
 	}
-	{
-		ShopItem@ s = addShopItem(this, "Arrows (30)", "$mat_arrows$", "mat_arrows-30", descriptions[2], true);
-		AddRequirement(s.requirements, "coin", "", "Coins", 15);
+	// {
+		// ShopItem@ s = addShopItem(this, "Arrows (30)", "$mat_arrows$", "mat_arrows-30", descriptions[2], true);
+		// AddRequirement(s.requirements, "coin", "", "Coins", 15);
 		
-		s.spawnNothing = true;
-	}
+		// s.spawnNothing = true;
+	// }
 	{
 		ShopItem@ s = addShopItem(this, "Crate", "$crate$", "crate", "A wooden crate used for storage.\nBreaks upon impact.", true);
 		AddRequirement(s.requirements, "blob", "mat_wood", "Wood", 75);
@@ -69,7 +69,7 @@ void onInit(CBlob@ this)
 	}
 	{
 		ShopItem@ s = addShopItem(this, "Building for Dummies", "$artisancertificate$", "artisancertificate", "Simplified Builder manuscript for those dumb peasants.", true);
-		AddRequirement(s.requirements, "coin", "", "Coins", 75);
+		AddRequirement(s.requirements, "coin", "", "Coins", 300);
 		
 		s.spawnNothing = true;
 	}
@@ -92,11 +92,18 @@ void onInit(CBlob@ this)
 		
 		s.spawnNothing = true;
 	}
+	{
+		ShopItem@ s = addShopItem(this, "Engineer's Tools", "$engineertools$", "engineertools", "Engineer's Tools for real engineers.", true);
+		AddRequirement(s.requirements, "blob", "mat_ironingot", "Iron Ingot", 4);
+		AddRequirement(s.requirements, "coin", "", "Coins", 1000);
+		
+		s.spawnNothing = true;
+	}
 }
 
 void GetButtonsFor(CBlob@ this, CBlob@ caller)
 {
-	if(caller.getConfig() == this.get_string("required class"))
+	if(caller.getName() == this.get_string("required class"))
 	{
 		this.set_Vec2f("shop offset", Vec2f_zero);
 	}
@@ -123,7 +130,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		
 		if (callerBlob is null) return;
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			string[] spl = name.split("-");
 			

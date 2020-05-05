@@ -8,7 +8,7 @@
 
 void onInit(CBlob@ this)
 {
-	this.getSprite().addSpriteLayer("isOnScreen", "NoTexture.png", 0, 0);
+	this.getSprite().addSpriteLayer("isOnScreen","NoTexture.png",1,1);
 	this.set_u32("nextAttack", 0);
 	this.set_u32("nextBomb", 0);
 	
@@ -228,21 +228,7 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 			this.set_u32("next sound", getGameTime() + 60);
 		}
 	}
-	
-	if (isServer())
-	{
-		CBrain@ brain = this.getBrain();
-		
-		if (brain !is null && hitterBlob !is null)
-		{
-			if (hitterBlob.getTeamNum() != this.getTeamNum() && hitterBlob.isCollidable()) 
-			{
-				if (brain.getTarget() is null) brain.SetTarget(hitterBlob);
-				else if (!hitterBlob.hasTag("material")) brain.SetTarget(hitterBlob);
-			}
-		}
-	}
-	
+
 	return damage;
 }
 

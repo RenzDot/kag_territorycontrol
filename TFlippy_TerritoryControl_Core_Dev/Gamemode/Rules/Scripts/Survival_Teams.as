@@ -46,12 +46,12 @@ void onNewPlayerJoin(CRules@ this, CPlayer@ player)
 {
 	//print("new ply");
 
-	if (getNet().isServer())
+	if (isServer())
 	{
 		server_SynchronizeTeams(this);
 	}
 	
-	// if (getNet().isClient())
+	// if (isClient())
 	// {
 		// Synchronize(this);
 	// }
@@ -160,7 +160,7 @@ void server_SynchronizeTeams(CRules@ this)
 
 void onTick(CRules@ this)
 {
-	// if (getNet().isClient() && !getNet().isServer())
+	// if (isClient() && !isServer())
 	// {
 		// Synchronize(this);
 	// }
@@ -194,7 +194,7 @@ void onTick(CRules@ this)
 					u8 team = p.getTeamNum();
 					if (team >= maxTeams) continue;
 					
-					team_list[team].upkeep += 10;
+					team_list[team].upkeep += 10 + (team_list[team].player_count * 5);
 					team_list[team].player_count++;
 					team_list[team].wealth += p.getCoins();
 				}
@@ -244,7 +244,7 @@ void onTick(CRules@ this)
 				}
 			}
 				
-			if (getNet().isServer())
+			if (isServer())
 			{
 				server_SynchronizeTeams(this);
 			

@@ -78,8 +78,6 @@ bool isInRadius(CBlob@ this, CBlob @caller)
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
-	bool isServer = getNet().isServer();
-
 	if (cmd == this.getCommandID("shop menu"))
 	{
 		if (this.hasTag("shop disabled"))
@@ -139,7 +137,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			//	return;
 			//}
 
-			if (!getNet().isServer()) { return; } //only do this on server
+			if (!isServer()) { return; } //only do this on server
 
 			bool tookReqs = false;
 
@@ -236,38 +234,38 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 										caller.server_PutInInventory(blob);
 									}
 								}
-								// Hack: Archer Shop can force Archer to drop Arrows.
-								else if (this.getName() == "archershop" && caller.getName() == "archer")
-								{
-									int arrowCount = callerInv.getCount("mat_arrows");
-									int stacks = arrowCount / 30;
-									// Hack: Depends on Arrow stack size.
-									if (stacks > 1)
-									{
-										CBlob@ arrowStack = caller.server_PutOutInventory("mat_arrows");
-										if (arrowStack !is null && caller !is null)
-										{
-											if (arrowStack.getAttachments() !is null && arrowStack.getAttachments().getAttachmentPointByName("PICKUP") !is null)
-											{
-												caller.server_Pickup(arrowStack);
-											}
-											else
-											{
-												arrowStack.setPosition(caller.getPosition());
-											}
-										}
-										if(caller !is null && blob !is null)
-										{
-											caller.server_PutInInventory(blob);
-										}
-									}
-									else if (pickable)
-									{
-										if(caller !is null && blob !is null){
-											caller.server_Pickup(blob);
-										}
-									}
-								}
+								// // Hack: Archer Shop can force Archer to drop Arrows.
+								// else if (this.getName() == "archershop" && caller.getName() == "archer")
+								// {
+									// int arrowCount = callerInv.getCount("mat_arrows");
+									// int stacks = arrowCount / 30;
+									// // Hack: Depends on Arrow stack size.
+									// if (stacks > 1)
+									// {
+										// CBlob@ arrowStack = caller.server_PutOutInventory("mat_arrows");
+										// if (arrowStack !is null && caller !is null)
+										// {
+											// if (arrowStack.getAttachments() !is null && arrowStack.getAttachments().getAttachmentPointByName("PICKUP") !is null)
+											// {
+												// caller.server_Pickup(arrowStack);
+											// }
+											// else
+											// {
+												// arrowStack.setPosition(caller.getPosition());
+											// }
+										// }
+										// if(caller !is null && blob !is null)
+										// {
+											// caller.server_PutInInventory(blob);
+										// }
+									// }
+									// else if (pickable)
+									// {
+										// if(caller !is null && blob !is null){
+											// caller.server_Pickup(blob);
+										// }
+									// }
+								// }
 								else if (pickable)
 								{
 									if(caller !is null && blob !is null)

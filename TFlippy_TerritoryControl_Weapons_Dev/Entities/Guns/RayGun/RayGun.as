@@ -87,7 +87,7 @@ void onTick(CBlob@ this)
 
 					CSpriteLayer@ gammalaser = this.getSprite().getSpriteLayer("gammalaser");
 
-					if (getNet().isClient())
+					if (isClient())
 					{					
 						if (gammalaser !is null)
 						{
@@ -99,7 +99,7 @@ void onTick(CBlob@ this)
 						}
 					}
 
-					if (getNet().isServer())
+					if (isServer())
 					{		
 						HitInfo@[] blobs;
 						getMap().getHitInfosFromRay(startPos, angle + (flip ? 180 : 0), maxDistance, holder, blobs);

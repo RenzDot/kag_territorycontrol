@@ -142,7 +142,7 @@ void onInit(CBlob@ this)
 	this.set_string("shop description", name + " the Trader");
 	this.setInventoryName(name + " the Trader");
 	this.set_u8("shop icon", 25);
-	this.getSprite().addSpriteLayer("isOnScreen", "NoTexture.png", 0, 0);
+	this.getSprite().addSpriteLayer("isOnScreen", "NoTexture.png", 1, 1);
 	
 	this.set_u32("lastDanger", 0);
 	
@@ -270,11 +270,6 @@ void onTick(CBlob@ this)
 			return;
 		}
 	
-		if(isClient()){
-			if(!this.getSprite().getSpriteLayer("isOnScreen").isOnScreen()){
-				return;
-			}
-		}
 		if (getGameTime() >= this.get_u32("nextTalk"))
 		{
 			this.set_u32("nextTalk", getGameTime() + (30 * 10) + XORRandom(30 * 20));
@@ -289,23 +284,23 @@ void onTick(CBlob@ this)
 			{
 				// this.set_u32("lastDanger", getGameTime());
 				
-				text = textsDanger[XORRandom(textsDanger.length())];
-				this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.length())]);
+				text = textsDanger[XORRandom(textsDanger.size())];
+				this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.size())]);
 			}
 			else
 			{
 				if (getGameTime() - this.get_u32("lastDanger") < 30 * 60)
 				{
-					text = textsWon[XORRandom(textsWon.length())];
+					text = textsWon[XORRandom(textsWon.size())];
 				}
 				else
 				{
-					text = textsIdle[XORRandom(textsIdle.length())];
-					this.getSprite().PlaySound(soundsTalk[XORRandom(soundsTalk.length())]);
+					text = textsIdle[XORRandom(textsIdle.size())];
+					this.getSprite().PlaySound(soundsTalk[XORRandom(soundsTalk.size())]);
 				}
 			}
 
-			if (getNet().isServer())
+			if (isServer())
 			{
 				CBitStream stream;
 				stream.write_string(text);
@@ -333,7 +328,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		
 		if (callerBlob is null) return;
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			string[] spl = name.split("-");
 			
@@ -382,7 +377,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 
 void onDie(CBlob@ this)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		server_DropCoins(this.getPosition(), XORRandom(400));
 	}
@@ -404,23 +399,6 @@ void onGib(CSprite@ this)
 	CParticle@ Gib1 = makeGibParticle("Entities/Special/WAR/Trading/TraderGibs.png", pos, vel + getRandomVelocity(90, hp, 80), 0, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall");
 	CParticle@ Gib2 = makeGibParticle("Entities/Special/WAR/Trading/TraderGibs.png", pos, vel + getRandomVelocity(90, hp - 0.2, 80), 1, 0, Vec2f(16, 16), 2.0f, 20, "/BodyGibFall");
 	CParticle@ Gib3 = makeGibParticle("Entities/Special/WAR/Trading/TraderGibs.png", pos, vel + getRandomVelocity(90, hp, 80), 2, 0, Vec2f(16, 16), 2.0f, 0, "/BodyGibFall");
-}
-
-void onHealthChange(CBlob@ this, f32 oldHealth)
-{
-	if (this.getHealth() < 1.0f && !this.hasTag("dead"))
-	{
-		this.Tag("dead");
-		this.set_bool("shop available", false);
-		// this.server_SetTimeToDie(20);
-	}
-
-	if (this.getHealth() < 0)
-	{
-		this.getSprite().Gib();
-		this.server_Die();
-		return;
-	}
 }
 
 bool canBePickedUp(CBlob@ this, CBlob@ byBlob)

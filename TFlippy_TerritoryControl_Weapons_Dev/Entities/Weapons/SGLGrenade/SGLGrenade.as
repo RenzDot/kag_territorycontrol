@@ -51,7 +51,7 @@ void onCollision(CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f point
 {
 	if (this.hasTag("grenade collided") && blob !is null && blob.getTeamNum() != this.getTeamNum())
 	{
-		if (getNet().isServer())
+		if (isServer())
 		{
 			this.server_Die();
 		}
@@ -126,7 +126,7 @@ void DoExplosion(CBlob@ this)
 
 void MakeParticle(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
+	if (!isClient()) return;
 
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + pos, vel, float(XORRandom(360)), 1.0f + XORRandom(100) * 0.01f, 2 + XORRandom(4), XORRandom(100) * -0.00005f, true);
+	ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 1.0f + XORRandom(100) * 0.01f, 2 + XORRandom(4), XORRandom(100) * -0.00005f, true);
 }

@@ -97,7 +97,7 @@ void onTick(CBlob@ this)
 				if (canSaw(this, blob))
 				{
 					Blend(this, blob);
-					if (getNet().isServer()) this.server_Hit(blob, blob.getPosition(), Vec2f(0, -2), 2.00f, Hitters::saw, true);
+					if (isServer()) this.server_Hit(blob, blob.getPosition(), Vec2f(0, -2), 2.00f, Hitters::saw, true);
 				}
 				else if (blob.hasTag("material") ? !this.server_PutInInventory(blob) : true)
 				{
@@ -120,9 +120,9 @@ void onTick(CSprite@ this)
 
 bool canSaw(CBlob@ this, CBlob@ blob)
 {
-	if (this.getTickSinceCreated() < 90 || blob.hasTag("sawed") || blob.getShape().isStatic() || (blob.getConfig() == "mat_stone" ? false : blob.hasTag("invincible"))) return false;
+	if (this.getTickSinceCreated() < 90 || blob.hasTag("sawed") || blob.getShape().isStatic() || (blob.getName() == "mat_stone" ? false : blob.hasTag("invincible"))) return false;
 
-	if (blob.hasTag("flesh") && getNet().isClient() && !g_kidssafe)
+	if (blob.hasTag("flesh") && isClient() && !g_kidssafe)
 	{
 		CSprite@ sprite = this.getSprite();
 		CSpriteLayer@ chop_left = sprite.getSpriteLayer("chop_left");
@@ -180,7 +180,7 @@ void Blend(CBlob@ this, CBlob@ blob)
 
 				if (XORRandom(100) < 75)
 				{
-					ParticleAnimated(CFileMatcher("Smoke.png").getFirst(), this.getPosition() + Vec2f(8 - XORRandom(16), 8 - XORRandom(16)), Vec2f((100 - XORRandom(200)) / 100.0f, 0.5f), 0.0f, 1.5f, 3, 0.0f, true);
+					ParticleAnimated("Smoke.png", this.getPosition() + Vec2f(8 - XORRandom(16), 8 - XORRandom(16)), Vec2f((100 - XORRandom(200)) / 100.0f, 0.5f), 0.0f, 1.5f, 3, 0.0f, true);
 				}
 			}
 			kill = true;
@@ -217,7 +217,7 @@ void Blend(CBlob@ this, CBlob@ blob)
 		{
 			if (blob.hasTag("flesh"))
 			{
-				if (getNet().isServer())
+				if (isServer())
 				{
 					f32 amount = ((blob.getRadius() + XORRandom(blob.getMass() / 3.0f)) / blob.getInitialHealth()) * 0.35f;
 					amount += XORRandom(amount) * 0.50f;
@@ -231,7 +231,7 @@ void Blend(CBlob@ this, CBlob@ blob)
 			}
 			else if (blob.hasTag("isWeapon"))
 			{
-				if (getNet().isServer())
+				if (isServer())
 				{
 					MakeMat(this, this.getPosition(), "mat_iron", 20 + XORRandom(60));
 					MakeMat(this, this.getPosition(), "mat_wood", 10 + XORRandom(40));

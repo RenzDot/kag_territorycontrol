@@ -117,6 +117,41 @@ const string[] textsWon =
 	"sit on ya arse"
 };
 
+u16 correctPrice(string drug, u16 proposed_price, bool selling)
+{
+	CRules@ rules = getRules();
+	
+	u16 current_price = rules.get_u32(drug+(!selling?"_sell":"_buy"));
+	if (current_price == 0)
+	{
+		current_price = proposed_price;
+	}
+	if (selling)
+	{
+		proposed_price = Maths::Max(current_price, proposed_price);
+	}
+	else
+	{
+		proposed_price = Maths::Min(current_price, proposed_price);
+	}
+
+	u16 update_price = rules.get_u32(drug+(selling?"_sell":"_buy"));
+	if (update_price == 0)
+	{
+		update_price = proposed_price;
+	}
+	if (selling)
+	{
+		update_price = Maths::Min(update_price, proposed_price);
+	}
+	else
+	{
+		update_price = Maths::Max(update_price, proposed_price);
+	}
+	rules.set_u32(drug+(selling?"_sell":"_buy"), update_price);
+	return proposed_price;
+}
+
 void onInit(CBlob@ this)
 {
 	Random@ rand = Random(this.getNetworkID());
@@ -124,7 +159,9 @@ void onInit(CBlob@ this)
 	this.set_string("trader name", name);
 	
 	this.getShape().SetRotationsAllowed(false);
-	this.set_f32("gib health", -20.00f);
+	this.set_f32("gib health", -2.0f);
+	this.set_f32("crak_effect", 1.00f);
+	this.set_f32("drunk_effect", 4.00f);
 	this.Tag("flesh");
 	this.Tag("migrant");
 	this.Tag("human");
@@ -136,7 +173,7 @@ void onInit(CBlob@ this)
 	this.addCommandID("traderChat");
 
 	this.set_Vec2f("shop offset", Vec2f(0, 0));
-	this.set_Vec2f("shop menu size", Vec2f(5, 3));
+	this.set_Vec2f("shop menu size", Vec2f(6, 4));
 	this.set_string("shop description", name + " the Hobo");
 	this.setInventoryName(name + " the Hobo");
 	this.set_u8("shop icon", 25);
@@ -175,6 +212,13 @@ void onInit(CBlob@ this)
 	{
 		ShopItem@ s = addShopItem(this, "firejob", "$icon_firejob$", "firejob", "fucking tie it to your neck and launch it ya cunt");
 		AddRequirement(s.requirements, "coin", "", "Coins", 250 + rand.NextRanged(1500));
+		s.spawnNothing = true;
+	}
+	
+	if (rand.NextRanged(100) < 25)
+	{
+		ShopItem@ s = addShopItem(this, "fireboom", "$icon_fireboom$", "fireboom", "ok so now listen carefully my dear this is illegal as fUCK");
+		AddRequirement(s.requirements, "coin", "", "Coins", 5000 + rand.NextRanged(20000));
 		s.spawnNothing = true;
 	}
 	
@@ -234,45 +278,17 @@ void onInit(CBlob@ this)
 			s.spawnNothing = true;
 		}
 	}
-	
-	if (rand.NextRanged(100) < 25)
-	{
-		ShopItem@ s = addShopItem(this, "fun", "$icon_domino$", "domino", "hoyl shit");
-		AddRequirement(s.requirements, "coin", "", "Coins", 150 + rand.NextRanged(500));
-		s.spawnNothing = true;
-	}
-	
-	if (rand.NextRanged(100) < 25)
-	{
-		ShopItem@ s = addShopItem(this, "speedo", "$icon_stim$", "stim", "speedy stuff you'll be fast like hedgehog");
-		AddRequirement(s.requirements, "coin", "", "Coins", 100 + rand.NextRanged(500));
-		s.spawnNothing = true;
-	}
-	
-	if (rand.NextRanged(100) < 25)
-	{
-		ShopItem@ s = addShopItem(this, "shite", "$icon_bobongo$", "bobongo", "stfu");
-		AddRequirement(s.requirements, "coin", "", "Coins", 125 + rand.NextRanged(500));
-		s.spawnNothing = true;
-	}
-	
+		
 	if (rand.NextRanged(100) < 25)
 	{
 		ShopItem@ s = addShopItem(this, "cat", "$icon_kitten$", "badger", "yea");
 		AddRequirement(s.requirements, "coin", "", "Coins", 50 + rand.NextRanged(500));
 		s.spawnNothing = true;
 	}
-	
-	if (rand.NextRanged(100) < 25)
-	{
-		ShopItem@ s = addShopItem(this, "yellow mellow", "$icon_foof$", "foof", "pissssss");
-		AddRequirement(s.requirements, "coin", "", "Coins", 100 + rand.NextRanged(500));
-		s.spawnNothing = true;
-	}
-	
+		
 	if (rand.NextRanged(100) < 3)
 	{
-		ShopItem@ s = addShopItem(this, "some retarded shite", "$icon_oof$", "oof", "it's a rake or some stuff now get the fuck out before i gouge your eyes out");
+		ShopItem@ s = addShopItem(this, "some retarded shite", "$icon_oof$", "oof", "it's a rake or some shit now get the fuck out before i gouge your eyes out");
 		AddRequirement(s.requirements, "coin", "", "Coins", 1 + rand.NextRanged(1000));
 		s.spawnNothing = true;
 	}
@@ -287,12 +303,107 @@ void onInit(CBlob@ this)
 		s.buttonheight = 2;
 	}
 	
-	if (getNet().isServer())
+	if (rand.NextRanged(100) < 50)
+	{
+		if (rand.NextRanged(100) < 25)
+		{
+			ShopItem@ s = addShopItem(this, "yellow mellow", "$icon_foof$", "foof", "pissssss");
+			AddRequirement(s.requirements, "coin", "", "Coins", correctPrice("foof", 100 + rand.NextRanged(500), true));
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 25)
+		{
+			ShopItem@ s = addShopItem(this, "fun", "$icon_domino$", "domino", "hoyl shit");
+			AddRequirement(s.requirements, "coin", "", "Coins", correctPrice("domino", 150 + rand.NextRanged(500), true));
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 30)
+		{
+			ShopItem@ s = addShopItem(this, "speedo", "$icon_stim$", "stim", "speedy stuff you'll be fast like hedgehog");
+			AddRequirement(s.requirements, "coin", "", "Coins", correctPrice("stim", 100 + rand.NextRanged(500), true));
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 40)
+		{
+			ShopItem@ s = addShopItem(this, "shite", "$icon_bobongo$", "bobongo", "stfu");
+			AddRequirement(s.requirements, "coin", "", "Coins", correctPrice("bobongo", 125 + rand.NextRanged(500), true));
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 40)
+		{
+			ShopItem@ s = addShopItem(this, "crack", "$icon_crak$", "crak", "gets shit done quick");
+			AddRequirement(s.requirements, "coin", "", "Coins", correctPrice("crak", 50 + rand.NextRanged(500), true));
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 25)
+		{
+			ShopItem@ s = addShopItem(this, "red stuff", "$icon_propesko$", "propesko", "had to do it to em");
+			AddRequirement(s.requirements, "coin", "", "Coins", correctPrice("propesko", 200 + rand.NextRanged(1000), true));
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 25)
+		{
+			ShopItem@ s = addShopItem(this, "smokey", "$icon_fumes$", "fumes", "fly like an idiot");
+			AddRequirement(s.requirements, "coin", "", "Coins", correctPrice("fumes", 100 + rand.NextRanged(1000), true));
+			s.spawnNothing = true;
+		}
+	}
+	else if (rand.NextRanged(100) < 40)
+	{
+		if (rand.NextRanged(100) < 50)
+		{
+			ShopItem@ s = addShopItem(this, "sell crak", "$COIN$", "coin-" + correctPrice("crak", 100 + XORRandom(400), false), "shitcrackers love these");
+			AddRequirement(s.requirements, "blob", "crak", "Crak", 1);
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 50)
+		{
+			ShopItem@ s = addShopItem(this, "sell rippio", "$COIN$", "coin-" + correctPrice("rippio", 400 + XORRandom(1500), false), "fucks them up pretty well");
+			AddRequirement(s.requirements, "blob", "rippio", "Rippio", 1);
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 50)
+		{
+			ShopItem@ s = addShopItem(this, "sell stim", "$COIN$", "coin-" + correctPrice("stim", 200 + XORRandom(300), false), "makes them cruise like hedgehog");
+			AddRequirement(s.requirements, "blob", "stim", "Stim", 1);
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 50)
+		{
+			ShopItem@ s = addShopItem(this, "sell propesko", "$COIN$", "coin-" + correctPrice("propesko", 400 + XORRandom(1000), false), "what are you lookin at");
+			AddRequirement(s.requirements, "blob", "propesko", "Propesko", 1);
+			s.spawnNothing = true;
+		}
+		
+		if (rand.NextRanged(100) < 50)
+		{
+			ShopItem@ s = addShopItem(this, "sell fumes", "$COIN$", "coin-" + correctPrice("fumes", 500 + XORRandom(1200), false), "smelly shit");
+			AddRequirement(s.requirements, "blob", "fumes", "Fumes", 1);
+			s.spawnNothing = true;
+		}
+	}
+	
+	if (isServer())
 	{
 		this.server_setTeamNum(-1);
 	}
 
-	this.getSprite().addSpriteLayer("isOnScreen", "NoTexture.png", 0, 0);
+	this.getCurrentScript().runFlags |= Script::tick_onscreen;
+	this.getCurrentScript().runFlags |= Script::tick_blob_in_proximity;
+	this.getCurrentScript().runProximityTag = "player";
+	this.getCurrentScript().runProximityRadius = 320.0f;
+	
+	this.set_f32("voice pitch", 0.75f);
+	this.getSprite().PlaySound("drunk_fx4");
 }
 
 void onTick(CBlob@ this)
@@ -303,12 +414,6 @@ void onTick(CBlob@ this)
 		{
 			this.Tag("dead");				
 			return;
-		}
-
-		if(isClient()){
-			if(!this.getSprite().getSpriteLayer("isOnScreen").isOnScreen()){
-				return;
-			}
 		}
 
 		uint time = getGameTime();
@@ -324,23 +429,23 @@ void onTick(CBlob@ this)
 			string text = "";
 			if (danger)
 			{
-				text = textsDanger[XORRandom(textsDanger.length())];
-				this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.length())], 0.75f, 0.75f);
+				text = textsDanger[XORRandom(textsDanger.size())];
+				this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.size())], 0.75f, 0.75f);
 			}
 			else
 			{
 				if (time - this.get_u32("lastDanger") < 30 * 60)
 				{
-					text = textsWon[XORRandom(textsWon.length())];
+					text = textsWon[XORRandom(textsWon.size())];
 				}
 				else
 				{
-					text = textsIdle[XORRandom(textsIdle.length())];
-					this.getSprite().PlaySound(soundsTalk[XORRandom(soundsTalk.length())], 0.75f, 1.00f);
+					text = textsIdle[XORRandom(textsIdle.size())];
+					this.getSprite().PlaySound(soundsTalk[XORRandom(soundsTalk.size())], 0.75f, 1.00f);
 				}
 			}
 
-			if (getNet().isServer())
+			if (isServer())
 			{
 				CBitStream stream;
 				stream.write_string(text);
@@ -386,9 +491,9 @@ void onTick(CBlob@ this)
 					
 						bool isAttached = this.isAttached();
 					
-						if (getNet().isClient())
+						if (isClient())
 						{	
-							if (isAttached) this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.length())], 0.75f, 0.75f);
+							if (isAttached) this.getSprite().PlaySound(soundsDanger[XORRandom(soundsDanger.size())], 0.75f, 0.75f);
 						}
 					
 						if (isServer())
@@ -410,6 +515,11 @@ void onTick(CBlob@ this)
 	}
 }
 
+void onSetPlayer(CBlob@ this, CPlayer@ player)
+{
+	this.set_bool("shop available", false);
+}
+
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
 	if (cmd == this.getCommandID("traderChat"))
@@ -428,7 +538,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		
 		if (callerBlob is null) return;
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			string[] spl = name.split("-");
 			
@@ -459,7 +569,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			else
 			{
 				CBlob@ blob = server_CreateBlob(spl[0], callerBlob.getTeamNum(), this.getPosition());
-				if (name == "oof" && getNet().isServer()) this.server_SetHealth(0.5f);
+				if (name == "oof" && isServer()) this.server_SetHealth(0.5f);
 				
 				if (blob is null || callerBlob is null) return;
 			   
@@ -478,7 +588,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 
 void onDie(CBlob@ this)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		server_DropCoins(this.getPosition(), XORRandom(1500));
 	}
@@ -502,26 +612,10 @@ void onGib(CSprite@ this)
 	CParticle@ Gib3 = makeGibParticle("Entities/Special/WAR/Trading/TraderGibs.png", pos, vel + getRandomVelocity(90, hp, 80), 2, 0, Vec2f(16, 16), 2.0f, 0, "/BodyGibFall");
 }
 
-void onHealthChange(CBlob@ this, f32 oldHealth)
-{
-	if (this.getHealth() < 1.0f && !this.hasTag("dead"))
-	{
-		this.Tag("dead");
-		this.set_bool("shop available", false);
-		// this.server_SetTimeToDie(20);
-	}
-
-	if (this.getHealth() < 0)
-	{
-		this.getSprite().Gib();
-		this.server_Die();
-		return;
-	}
-}
 
 bool canBePickedUp(CBlob@ this, CBlob@ byBlob)
 {
-	return true;
+	return this.hasTag("dead") || this.getPlayer() is null;
 }
 
 f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData)
@@ -529,7 +623,9 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 	this.set_u32("lastDanger", getGameTime());
 	this.set_u16("danger blob", hitterBlob.getNetworkID());
 	this.set_u32("nextTalk", this.get_u32("nextTalk") - (30 * damage * 13));
-	
+
+	if (customData == Hitters::suicide) damage = 0;
+
 	return damage;
 }
 
@@ -543,10 +639,6 @@ void onAttach(CBlob@ this, CBlob@ attached, AttachmentPoint @attachedPoint)
 void onTick(CSprite@ this)
 {
 	CBlob@ blob = this.getBlob();
-
-	if(!this.getSpriteLayer("isOnScreen").isOnScreen()){
-		return;
-	}
 	
 	if (blob.hasTag("dead"))
 	{
@@ -586,5 +678,27 @@ void onTick(CSprite@ this)
 	else if (ended)
 	{
 		this.SetAnimation("default");
+	}
+}
+
+void onCollision(CBlob@ this, CBlob@ blob, bool solid, Vec2f normal, Vec2f point1)
+{
+	if (blob is null) return;
+	if (this.hasTag("dead")) return;
+
+	if (blob.getName() == "mat_mithrilenriched" && blob.getQuantity() > 5)
+	{
+		if (isServer() && !this.hasTag("transformed"))
+		{
+			CBlob@ blob = server_CreateBlob("hoob", this.getTeamNum(), this.getPosition());
+			if (this.getPlayer() !is null) blob.server_SetPlayer(this.getPlayer());
+			
+			this.Tag("transformed");
+			this.server_Die();
+		}
+		else
+		{
+			ParticleZombieLightning(this.getPosition());
+		}
 	}
 }

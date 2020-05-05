@@ -19,17 +19,14 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 
 		CBlob@ caller = getBlobByNetworkID(params.read_u16());
 		if (caller !is null)
-		{
-			if (!caller.exists("drunk") || caller.get_u16("drunk") == 0) caller.AddScript("Drunk.as");
-		
-			caller.set_u16("drunk", Maths::Min(caller.get_u16("drunk") + 5, 60000));
-			caller.set_u32("next sober", getGameTime());
-			
-			if (getNet().isServer())
+		{		
+			if (!caller.hasScript("Drunk_Effect.as")) caller.AddScript("Drunk_Effect.as");			
+			caller.add_f32("drunk_effect", 6);
+
+			if (isServer())
 			{
 				this.server_Die();
 			}
-		
 		}
 	}
 }

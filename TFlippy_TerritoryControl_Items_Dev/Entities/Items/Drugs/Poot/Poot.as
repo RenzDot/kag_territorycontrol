@@ -31,14 +31,14 @@ void onTick(CBlob@ this)
 			{
 				if (this.get_u32("next attack") > getGameTime()) return;
 			
-				if (getNet().isClient())
+				if (isClient())
 				{
 					this.getSprite().PlaySound("drunk_fx3.ogg", 0.8f, 0.75f);
 					this.getSprite().SetAnimation("default");
 					this.getSprite().SetAnimation("honk");
 				}
 				
-				if (getNet().isServer())
+				if (isServer())
 				{
 					CBlob@ blob = server_CreateBlobNoInit("pootgas");
 					blob.setVelocity(Vec2f(holder.isFacingLeft() ? -3 : 3, 0));

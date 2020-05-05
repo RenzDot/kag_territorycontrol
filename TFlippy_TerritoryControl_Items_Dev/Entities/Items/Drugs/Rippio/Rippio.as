@@ -2,6 +2,8 @@ void onInit(CBlob@ this)
 {
 	this.getShape().SetRotationsAllowed(true);
 	this.addCommandID("consume");
+	
+	this.Tag("forcefeed_always");
 }
 
 void GetButtonsFor(CBlob@ this, CBlob@ caller)
@@ -22,9 +24,9 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 		if (caller !is null)
 		{
 			if (!caller.hasScript("Rippioed.as")) caller.AddScript("Rippioed.as");
-			caller.set_f32("rippioed", caller.get_f32("rippioed") * 2.00f);
+			caller.set_f32("rippioed", 0.50f + caller.get_f32("rippioed") * 2.00f);
 			
-			if (getNet().isServer())
+			if (isServer())
 			{
 				this.server_Die();
 			}

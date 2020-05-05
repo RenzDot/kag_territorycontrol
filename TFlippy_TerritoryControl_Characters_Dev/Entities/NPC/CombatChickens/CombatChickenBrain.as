@@ -1,12 +1,14 @@
 #include "BrainCommon.as"
 #include "Hitters.as";
 #include "RunnerCommon.as";
+#include "DeityCommon.as";
+#include "Knocked.as";
 
 const f32 cursor_lerp_speed = 0.50f;
 
 void onInit(CBrain@ this)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		InitBrain( this );
 		this.server_SetActive( true ); // always running
@@ -25,9 +27,10 @@ void onInit(CBrain@ this)
 
 void onTick(CBrain@ this)
 {
-	if (!getNet().isServer()) return;
+	if (!isServer()) return;
 	
 	CBlob@ blob = this.getBlob();
+	if (getKnocked(blob) > 0) return;
 	
 	if (blob.getPlayer() !is null) return;
 	
@@ -108,7 +111,7 @@ void onTick(CBrain@ this)
 				
 				// print("" + d);
 				
-				if (b.getTeamNum() != myTeam && d <= chaseDistanceSqr && !b.hasTag("dead") && b.hasTag("flesh") && !b.hasTag("invincible") && (isVisible(blob, b) || d < (48 * 48)))
+				if (b.getTeamNum() != myTeam && d <= chaseDistanceSqr && !b.hasTag("dead") && b.hasTag("flesh") && !b.hasTag("invincible") && b.get_u8("deity_id") != Deity::foghorn && (isVisible(blob, b) || d < (48 * 48)))
 				{
 					this.SetTarget(b);
 					blob.set_u32("nextAttack", getGameTime() + blob.get_u8("reactionTime"));
@@ -124,7 +127,7 @@ void onTick(CBrain@ this)
 		}
 
 		
-		// print(blob.getConfig() + stuck);
+		// print(blob.getName() + stuck);
 		
 		// print("" + this.getPathSize());
 		
@@ -202,7 +205,7 @@ void onTick(CBrain@ this)
 	
 	if (target !is null && target !is blob)
 	{			
-		// print("" + target.getConfig());
+		// print("" + target.getName());
 	
 		this.getCurrentScript().tickFrequency = 1;
 		
@@ -299,9 +302,15 @@ void Attack(CBrain@ this, CBlob@ target, bool useBombs)
 {
 	CBlob@ blob = this.getBlob();
 
-	blob.setAimPos(target.getPosition());
+	// blob.setAimPos(target.getPosition());
 	// const f32 reactionTime = blob.get_f32("reactionTime");
 
+	
+	f32 dist = (target.getPosition() - blob.getPosition()).Length();
+	f32 jitter = blob.get_f32("inaccuracy") * Maths::Sqrt(dist);
+	Vec2f randomness = getRandomVelocity(0, (XORRandom(1000) * 0.001f) * jitter * 20.00f, 360);	
+	blob.setAimPos(Vec2f_lerp(blob.getAimPos(), target.getPosition() + randomness, 0.20f));
+	
 	if (blob.get_u32("nextAttack") < getGameTime())
 	{
 		AttachmentPoint@ point = blob.getAttachments().getAttachmentPointByName("PICKUP");
@@ -313,13 +322,13 @@ void Attack(CBrain@ this, CBlob@ target, bool useBombs)
 			{
 				if (blob.get_u32("nextAttack") < getGameTime())
 				{							
-					f32 dist = (target.getPosition() - blob.getPosition()).Length();
-					f32 jitter = blob.get_f32("inaccuracy") * Maths::Sqrt(dist);
+					// f32 dist = (target.getPosition() - blob.getPosition()).Length();
+					// f32 jitter = blob.get_f32("inaccuracy") * Maths::Sqrt(dist);
 					
 					// print("jitter " + Maths::Sqrt(dist));
 					
 					// Vec2f randomness = Vec2f((100 - XORRandom(200)) * jitter, (100 - XORRandom(200)) * jitter);
-					Vec2f randomness = getRandomVelocity(0, (XORRandom(1000) * 0.001f) * jitter * 20.00f, 360);	
+					// Vec2f randomness = getRandomVelocity(0, (XORRandom(1000) * 0.001f) * jitter * 20.00f, 360);	
 				
 					// Vec2f currentCursorPos = this.getAimPos();
 					// Vec2f targetCursorPos = target.getPosition() + randomness;
@@ -333,7 +342,7 @@ void Attack(CBrain@ this, CBlob@ target, bool useBombs)
 				
 					// blob.setAimPos(targetCursorPos);
 				
-					blob.setAimPos(target.getPosition() + randomness);
+					
 					blob.setKeyPressed(key_action1, true);
 					blob.set_u32("nextAttack", getGameTime() + blob.get_u8("attackDelay"));
 				}

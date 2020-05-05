@@ -9,12 +9,12 @@ const f32 max_time = 3.00f;
 
 void onInit(CBlob@ this)
 {
-	if (getNet().isClient() && this.isMyPlayer()) getMap().CreateSkyGradient("skygradient_domino.png");
+	if (isClient() && this.isMyPlayer()) getMap().CreateSkyGradient("skygradient_domino.png");
 }
 
 void onDie(CBlob@ this)
 {
-	if (getNet().isClient() && this.isMyPlayer()) getMap().CreateSkyGradient("skygradient.png");
+	if (isClient() && this.isMyPlayer()) getMap().CreateSkyGradient("skygradient.png");
 }
 
 void onTick(CBlob@ this)
@@ -26,12 +26,12 @@ void onTick(CBlob@ this)
 	
 	if (true_level <= 0)
 	{
-		if (getNet().isServer())
+		if (isServer())
 		{
 			this.server_Die();
 		}
 	
-		if (getNet().isClient() && this.isMyPlayer()) getMap().CreateSkyGradient("skygradient.png");
+		if (isClient() && this.isMyPlayer()) getMap().CreateSkyGradient("skygradient.png");
 		this.getCurrentScript().runFlags |= Script::remove_after_this;
 	}
 	else
@@ -56,12 +56,12 @@ void onTick(CBlob@ this)
 				f32 maxHealth = Maths::Ceil(this.getInitialHealth() * 2.00f);
 				if (this.getHealth() < maxHealth)
 				{				
-					if (getNet().isServer())
+					if (isServer())
 					{
 						this.server_SetHealth(Maths::Min(this.getHealth() + 0.125f, maxHealth));
 					}
 					
-					if (getNet().isClient())
+					if (isClient())
 					{
 						for (int i = 0; i < 4; i++)
 						{
@@ -83,7 +83,7 @@ void onTick(CBlob@ this)
 				this.getSprite().PlaySound("TraderScream.ogg", 0.8f, this.getSexNum() == 0 ? 1.0f : 2.0f);
 			}
 			
-			if (getNet().isClient())
+			if (isClient())
 			{
 				if (this.isMyPlayer())
 				{
@@ -121,7 +121,7 @@ void onTick(CBlob@ this)
 	
 		// print("" + modifier);
 		// print("" + level / max_time);
-		//this.set_f32("dominoed", Maths::Max(0, this.get_f32("dominoed") - (0.0005f)));
+		this.set_f32("dominoed", Maths::Max(0, this.get_f32("dominoed") - (0.0005f)));
 	}
 	
 	// print("" + true_level);

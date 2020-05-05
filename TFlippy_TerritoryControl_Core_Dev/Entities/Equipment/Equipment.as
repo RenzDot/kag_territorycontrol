@@ -268,6 +268,15 @@ void removeHead(CBlob@ playerblob, string headname)		//Here you can remove side 
 		}
 	}
 	
+	if(headname == "crown")
+	{
+		CSpriteLayer@ crown = playerblob.getSprite().getSpriteLayer("crown");
+		if (crown !is null)
+		{
+			playerblob.getSprite().RemoveSpriteLayer("crown");
+		}
+	}
+	
 	if(headname == "militaryhelmet")
 	{
 		CSpriteLayer@ milhelmet = playerblob.getSprite().getSpriteLayer("milhelmet");
@@ -296,7 +305,7 @@ void removeHead(CBlob@ playerblob, string headname)		//Here you can remove side 
 	}
 	
 	playerblob.Untag(headname);
-	if(getNet().isServer())
+	if(isServer())
 	{
 		if(headname == "militaryhelmet")			//need to be after creating blob, bcos it sets hp to it
 		{
@@ -368,7 +377,7 @@ void removeTorso(CBlob@ playerblob, string torsoname)		//Same stuff with removin
 	}
 	
 	playerblob.Untag(torsoname);
-	if(getNet().isServer())
+	if(isServer())
 	{
 		if(torsoname == "bulletproofvest")			//need to be after creating blob, bcos it sets hp to it
 		{
@@ -407,7 +416,7 @@ void removeBoots(CBlob@ playerblob, string bootsname)		//I think you should alre
 	}
 	
 	playerblob.Untag(bootsname);
-	if(getNet().isServer())
+	if(isServer())
 	{
 		if(bootsname == "combatboots")			//need to be after creating blob, bcos it sets hp to it
 		{
@@ -427,7 +436,7 @@ void removeBoots(CBlob@ playerblob, string bootsname)		//I think you should alre
 
 void onDie(CBlob@ this)
 {
-    if (getNet().isServer())
+    if (isServer())
 	{
 		if (this.get_string("equipment_head") != "")
 		{

@@ -24,7 +24,7 @@ const string[] screams =
 void onInit(CSprite@ this)
 {
 	this.ReloadSprites(0, 0); //always blue
-	this.addSpriteLayer("isOnScreen","NoTexture.png",0,0);
+	this.addSpriteLayer("isOnScreen","NoTexture.png",1,1);
 }
 
 void onTick(CSprite@ this)
@@ -102,6 +102,8 @@ void onInit(CBlob@ this)
 			// ap.offsetZ = 10.0f;
 		// }
 	// }
+	
+	if (!this.exists("voice_pitch")) this.set_f32("voice pitch", 0.50f);
 }
 
 bool canBePickedUp(CBlob@ this, CBlob@ byBlob)

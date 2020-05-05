@@ -16,7 +16,7 @@ int g_layEggInterval = 0;
 void onInit(CSprite@ this)
 {
 	this.ReloadSprites(0, 0); //always blue
-	this.addSpriteLayer("isOnScreen","NoTexture.png",0,0);
+	this.addSpriteLayer("isOnScreen","NoTexture.png",1,1);
 }
 
 void onTick(CSprite@ this)
@@ -110,7 +110,7 @@ void onInit(CBlob@ this)
 	att.SetKeysToTake(key_action1);*/
 
 	// movement
-
+	
 	this.server_setTeamNum(250);
 	
 	AnimalVars@ vars;
@@ -121,6 +121,8 @@ void onInit(CBlob@ this)
 	vars.slowForce.Set(1.0f, 0.0f);
 	vars.jumpForce.Set(0.0f, -20.0f);
 	vars.maxVelocity = 1.1f;
+	
+	if (!this.exists("voice_pitch")) this.set_f32("voice pitch", 2.00f);
 }
 
 bool canBePickedUp(CBlob@ this, CBlob@ byBlob)
@@ -135,13 +137,9 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 
 void onTick(CBlob@ this)
 {
-	if(isClient()){
-		if(!this.getSprite().getSpriteLayer("isOnScreen").isOnScreen()){
-			return;
-		}	
-	}
 	Vec2f vel=this.getVelocity();
-	if(vel.x!=0.0f){
+	if(vel.x!=0.0f)
+	{
 		this.SetFacingLeft(vel.x<0.0f ? true : false);
 	}
 
@@ -187,7 +185,7 @@ void onTick(CBlob@ this)
 		g_lastSoundPlayedTime =  getGameTime();
 
 		// lay eggs
-		if (getNet().isServer())
+		if (isServer())
 		{
 			g_layEggInterval++;
 			if (g_layEggInterval % 13 == 0)

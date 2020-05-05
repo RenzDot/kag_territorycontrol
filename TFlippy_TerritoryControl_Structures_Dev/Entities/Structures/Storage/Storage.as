@@ -94,7 +94,7 @@ void onTick(CBlob@ this)
 
 void PickupOverlap(CBlob@ this)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		Vec2f tl, br;
 		this.getShape().getBoundingRect(tl, br);
@@ -103,7 +103,7 @@ void PickupOverlap(CBlob@ this)
 		for (uint i = 0; i < blobs.length; i++)
 		{
 			CBlob@ blob = blobs[i];
-			if (!blob.isAttached() && blob.isOnGround() && blob.hasTag("material") && blob.getName() != "mat_arrows")
+			if (!blob.isAttached() && blob.isOnGround() && blob.hasTag("material"))
 			{
 				this.server_PutInInventory(blob);
 			}
@@ -129,7 +129,7 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller)
 
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		if (cmd == this.getCommandID("store inventory"))
 		{
@@ -137,7 +137,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 			if (caller !is null)
 			{
 				CInventory @inv = caller.getInventory();
-				if (caller.getConfig() == "builder")
+				if (caller.getName() == "builder")
 				{
 					CBlob@ carried = caller.getCarriedBlob();
 					if (carried !is null)
@@ -149,13 +149,17 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 						}
 					}
 				}
+				
 				if (inv !is null)
 				{
 					while (inv.getItemsCount() > 0)
 					{
-						CBlob @item = inv.getItem(0);
-						caller.server_PutOutInventory(item);
-						this.server_PutInInventory(item);
+						CBlob@ item = inv.getItem(0);
+						if (!this.server_PutInInventory(item))
+						{
+							caller.server_PutInInventory(item);
+							break;
+						}
 					}
 				}
 			}
@@ -280,7 +284,7 @@ void updateLayers(CBlob@ this, CBlob@ blob)
 		if (blobCount > 0)
 		{
 			AttachmentPoint@ point = this.getAttachments().getAttachmentPointByName("LANTERN");
-			if (getNet().isServer() && point.getOccupied() is null)
+			if (isServer() && point.getOccupied() is null)
 			{
 				CBlob@ lantern = server_CreateBlob("lantern");
 				if (lantern !is null)

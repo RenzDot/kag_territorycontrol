@@ -6,11 +6,13 @@ string[] w_wtf = {"gosh", "omg", "geez", "jesus", "woot", "wut", "wat", "oo", "x
 string[] w_filler = {"like", "just", "maybe", "basically", "well", "*burp*", "pbfpsfst", "pffffoo", "buhuhu", "huhu", "harhar"};
 string[] w_friends = {"darlings", "loves", "children", "friends", "comrades", "players", "beings", "bwoosh", "geti"};
 string[] w_smileys = {":)", ":(", ":D", "XD", "xd", ":)))", ":o", ";(", ";_;", "<3", ":3"};
+string[] w_expletives = {"fuck", "shit", "cock", "shite", "fuc", "fug", "bugger", "feck", "piss"};
 
 string GetWTF() { return w_wtf[XORRandom(w_wtf.length)]; }
 string GetFiller() { return w_filler[XORRandom(w_filler.length)]; }
 string GetFriends() { return w_friends[XORRandom(w_friends.length)]; }
 string GetSmileys() { return w_smileys[XORRandom(w_smileys.length)]; }
+string GetExpletive() { return w_expletives[XORRandom(w_expletives.length)]; }
 
 bool onClientProcessChat(CRules@ this, const string &in text_in, string &out text_out, CPlayer@ player)
 {
@@ -18,8 +20,9 @@ bool onClientProcessChat(CRules@ this, const string &in text_in, string &out tex
 	
 	CPlayer@ localPlayer = getLocalPlayer();
 	CBlob@ localBlob = getLocalPlayerBlob();
-	
-	if (localPlayer !is player && localBlob !is null && localPlayer !is null && localBlob.hasTag("schisked"))
+
+
+	if (XORRandom(10) == 0 && localPlayer !is player && localBlob !is null && localPlayer !is null && localBlob.hasTag("schisked"))
 	{
 		string playerName = localPlayer.getCharacterName();
 	
@@ -95,6 +98,33 @@ bool onClientProcessChat(CRules@ this, const string &in text_in, string &out tex
 		}
 	}
 	
+	if (player !is null)
+	{
+		CBlob@ senderBlob = player.getBlob();
+		if (senderBlob !is null)
+		{
+			if (senderBlob !is localBlob && senderBlob.hasTag("schisked"))
+			{	
+				int total_len = text_out.size();
+				int pos = XORRandom(total_len / 2);
+				string result = "";
+				
+				for (int i = 0; i < 3 && pos < total_len; i++)
+				{
+					int len = XORRandom(total_len - pos);
+					string segment = text_out.substr(pos, len);
+				
+					if (XORRandom(3) == 0) segment = segment.toUpper();
+					
+					result += segment;
+					pos += len;
+				}
+			
+				text_out = result;
+			}
+		}
+	}	
+	
 	return true;
 }
 
@@ -109,12 +139,15 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 	}
 
 	text_out = text_in;
+
+	string username = player.getUsername();
+	string charname = player.getCharacterName();
 	
 	///////////Lol, well you found it, feel free to look around.
 	///////////If the lines here really annoy you, just send me a message.
 	///////////If you're bunnie, then: AHAHAHAH :P
 	
-	if (player.getUsername() == "kreblthis" || player.getCharacterName() == "Hans Smooth")
+	if (username == "kreblthis" || charname == "Hans Smooth")
 	{
 		if (XORRandom(100) < 20)
 		{
@@ -192,9 +225,9 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 		}
 	}
 	
-	if (blob.get_u16("drunk") > 0)
+	if (blob.get_f32("drunk_effect") > 0)
 	{
-		if (XORRandom(100) < blob.get_u16("drunk") * 10)
+		if (XORRandom(100) < blob.get_f32("drunk_effect") * 10)
 		{
 			switch(XORRandom(13))
 			{
@@ -324,6 +357,115 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 		text_out = tempReplace("e", "ee",text_out);
 	}
 	
+	if (blob.get_f32("crak_effect") > 0)
+	{
+		switch(XORRandom(8))
+		{
+			case 0:
+				if (XORRandom(4) == 0) text_out += " :DDDD";
+				break;
+				
+			case 1:
+				if (XORRandom(5) == 0) text_out += " OH " + GetExpletive() + " MY TEETH!";
+				break;
+				
+			case 2:
+				if (XORRandom(2) == 0) text_out += " " + text_out;
+				break;
+				
+			case 3:
+				if (XORRandom(4) == 0) text_out += " AAAA";
+				break;
+				
+			case 4:
+				if (XORRandom(3) == 0) text_out = "EEEE " + text_out; 
+				break;
+				
+			case 5:
+				if (XORRandom(2) == 0) text_out += " HHHHHHH";
+				break;
+		
+			case 6:
+				text_out += " " + GetExpletive();
+				break;
+				
+			case 7:
+				if (XORRandom(4) == 0) text_out = "HOLY " + GetExpletive();
+				break;
+				
+			default:
+				break;
+		}
+		
+		// text_out = text_out.toLower();
+		// text_out = text_out.replace("th", "f");
+		// text_out = text_out.replace("t's", "f");
+		// text_out = text_out.replace("z", "f");
+		// text_out = text_out.replace("s", "f");
+		// text_out = text_out.replace("g", "f");
+		// text_out = text_out.replace("l", "w");
+		// text_out = text_out.replace("c", "f");
+		// text_out = text_out.replace("k", "f");
+		// text_out = text_out.replace("t", "f");
+		// text_out = text_out.replace("r", "w");
+	
+		// // Broken Dementia
+		// int total_len = text_out.size();
+		// int pos = XORRandom(total_len / 2);
+		// string result = "";
+		
+		// for (int i = 0; i < 3 && pos < total_len; i++)
+		// {
+			// int len = XORRandom(total_len - pos);
+			// string segment = text_out.substr(pos, len);
+		
+			// if (XORRandom(3) == 0) segment = segment.toUpper();
+			
+			// result += segment;
+		// }
+		// text_out = result;
+	
+		// if (text_out.find("!") > 0)
+		// {
+			// text_out = text_out.toUpper();
+		// }
+		
+		// // Dementia
+		// int total_len = text_out.size();
+		// int pos = XORRandom(total_len / 2);
+		// string result = "";
+		
+		// for (int i = 0; i < 3 && pos < total_len; i++)
+		// {
+			// int len = XORRandom(total_len - pos);
+			// string segment = text_out.substr(pos, len);
+		
+			// if (XORRandom(3) == 0) segment = segment.toUpper();
+			
+			// result += segment;
+			// pos += len;
+		// }
+	
+		// text_out = result;
+		
+		int total_len = text_out.size();
+		int pos = 0;
+		string result = "";
+		
+		for (int i = 0; i < 10 && pos < total_len; i++)
+		{
+			int len = 1 + XORRandom(total_len - pos);
+			string segment = text_out.substr(pos - (1 - XORRandom(2)), len);
+		
+			if (XORRandom(3) == 0) segment = segment.toUpper();
+			
+			result += segment;
+			pos += len;
+		}
+	
+		text_out = result;
+	}
+	
 	f32 stim = blob.get_f32("stimed");
 	if (stim > 0)
 	{		
@@ -334,16 +476,78 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 		}
 	}
 	
-	if (player.getUsername() == "Vamist" || player.getCharacterName() == "Vamist") 
+	if (username == "Vamist" || charname == "Vamist") 
 	{
-		if(XORRandom(10) == 0)
+		if(XORRandom(100) == 0)
 		{
 			text_out += " Rawr~! <3";
 		}
 	}
 
+	if (player.getUsername() == "TFlippy" || player.getCharacterName() == "TFlippy")
+	{
+		if (XORRandom(100) < 5)
+		{
+			switch(XORRandom(9))
+			{
+				case 0:
+				{
+					text_out = "its a mystery";
+				}
+				break;
+				
+				case 1:
+				{
+					text_out = "rip";
+				}
+				break;
+				
+				case 2:
+				{
+					text_out = "ripi";
+				}
+				break;
+				
+				case 3:
+				{
+					text_out = "hi";
+				}
+				break;
+				
+				case 4:
+				{
+					text_out = "yus";
+				}
+				break;
+				
+				case 5:
+				{
+					text_out = "mystery";
+				}
+				break;
+				
+				case 6:
+				{
+					text_out = "rup";
+				}
+				break;
+				
+				case 7:
+				{
+					text_out = "such is life";
+				}
+				break;
+
+				case 8:
+				{
+					text_out = "snif";
+				}
+				break;
+			}
+		}
+	}
 	
-	if (player.getUsername() == "digga" || player.getCharacterName() == "Rajang" || player.hasTag("awootism")) 
+	if (username ==  "digga" || charname == "Rajang" || player.hasTag("awootism")) 
 	{
 		string emptyBOI = "";
 		bool noTouch = false;
@@ -352,7 +556,7 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
   		{
 
         	string letter = text_out.substr(i,1);
-			if(player.getUsername() == "digga" || player.getUsername() == "vamist")
+			if(username == "digga" || username == "vamist")
 			{
 				if(letter == '.')
 				{
@@ -450,7 +654,7 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 		}
 	}
 	
-	if (player.getUsername() == "BarsukEughen555" || player.getCharacterName() == "BarsukEughen")
+	if (username == "BarsukEughen555" || charname == "BarsukEughen")
 	{
 		if (XORRandom(100) == 0)
 		{

@@ -5,12 +5,33 @@
 #include "PixelOffsets.as"
 #include "RunnerTextures.as"
 #include "Accolades.as"
+#include "DeityCommon.as"
 
 const s32 NUM_HEADFRAMES = 4;
 const s32 NUM_UNIQUEHEADS = 30;
 const int FRAMES_WIDTH = 8 * NUM_HEADFRAMES;
 
 //handling Heads pack DLCs
+
+void onInit(CSprite@ this)
+{
+	CBlob@ blob = this.getBlob();
+	if (blob !is null)
+	{
+		blob.addCommandID("reload_head");
+	}
+}
+
+void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
+{
+	if (isClient())
+	{
+		if (cmd == this.getCommandID("reload_head"))
+		{
+			ReloadHead(this.getSprite());
+		}
+	}
+}
 
 int getHeadsPackIndex(int headIndex)
 {
@@ -72,7 +93,7 @@ int getHeadFrame(CBlob@ blob, int headIndex, bool default_pack = false)
 		//if nothing special set
 		if(!holidayhead)
 		{
-			string config = blob.getConfig();
+			string config = blob.getName();
 			if(config == "builder")
 			{
 				headIndex = NUM_UNIQUEHEADS;
@@ -109,31 +130,60 @@ string getHeadTexture(int headIndex)
 
 void onPlayerInfoChanged(CSprite@ this)
 {
+	ReloadHead(this);
+}
+
+void ReloadHead(CSprite@ this)
+{
 	CBlob@ blob = this.getBlob();
 	CPlayer@ ply = blob.getPlayer();
 	
-	if (ply !is null)
+	int head_index = blob.getHeadNum();
+	
+	if (ply !is null && blob !is null)
 	{
 		// Since he's evil
 		if (ply.getUsername() == "Mithrios")
 		{
 			blob.Tag("mithrios");
 		
-			blob.set_u8("override head", 101);
+			head_index = 101;
+			
 			blob.SetLight(true);
 			blob.SetLightRadius(16.0f);
 			blob.SetLightColor(SColor(255, 255, 0, 0));
+		}
+		
+		u8 deity_id = blob.get_u8("deity_id");
+		switch (deity_id)
+		{
+			case Deity::mithrios:
+			{
+				head_index = 101;
+			}
+			break;
+			
+			case Deity::ivan:
+			{
+				head_index = 104;
+			}
+			
+			case Deity::cocok:
+			{
+				head_index = 105;
+			}
+			break;
 		}
 	}
 	
 	//LoadHead(this, (blob.exists("override head") ? blob.get_u8("override head") : blob.getHeadNum()));
 	if(blob.exists("override head"))
 	{
-		LoadHead(this,blob.get_u8("override head"));
+		LoadHead(this, blob.get_u8("override head"));
 	}
 	else
 	{
-		LoadHead(this,blob.getHeadNum());
+		LoadHead(this, head_index);
 	}
 }
 
@@ -242,6 +292,7 @@ void onGib(CSprite@ this)
 void onTick(CSprite@ this)
 {
 	CBlob@ blob = this.getBlob();
+	if (blob is null) return;
 
 	ScriptData@ script = this.getCurrentScript();
 	if (script is null)
@@ -300,7 +351,7 @@ void onTick(CSprite@ this)
 			head.animation.frame = 2;
 
 			// sparkle blood if cut throat
-			if (getNet().isClient() && getGameTime() % 2 == 0 && blob.hasTag("cutthroat"))
+			if (isClient() && getGameTime() % 2 == 0 && blob.hasTag("cutthroat"))
 			{
 				Vec2f vel = getRandomVelocity(90.0f, 1.3f * 0.1f * XORRandom(40), 2.0f);
 				ParticleBlood(blob.getPosition() + Vec2f(this.isFacingLeft() ? headoffset.x : -headoffset.x, headoffset.y), vel, SColor(255, 126, 0, 0));

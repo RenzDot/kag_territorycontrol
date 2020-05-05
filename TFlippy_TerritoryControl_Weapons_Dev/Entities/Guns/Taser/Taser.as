@@ -99,7 +99,7 @@ void onTick(CBlob@ this)
 							continue;
 						}
 
-						if (getNet().isServer())
+						if (isServer())
 						{
 							this.server_Hit(b, b.getPosition(), Vec2f(0, 0), damage, HittersTC::electric, true);
 						}
@@ -111,7 +111,7 @@ void onTick(CBlob@ this)
 					}
 				}
 
-				if (getNet().isClient())
+				if (isClient())
 				{
 					CSpriteLayer@ zap = this.getSprite().getSpriteLayer("zap");
 					if (zap !is null)

@@ -32,7 +32,7 @@ void onInit(CBlob@ this)
 	this.getCurrentScript().tickFrequency = 1;
 	
 	this.set_f32("voice pitch", 1.50f);
-	this.getSprite().addSpriteLayer("isOnScreen", "NoTexture.png", 0, 0);
+	this.getSprite().addSpriteLayer("isOnScreen","NoTexture.png",1,1);
 	if (isServer())
 	{
 		this.set_u16("stolen coins", 250);
@@ -220,7 +220,7 @@ void onTick(CBlob@ this)
 		this.Tag("dead");
 		this.getSprite().PlaySound("Wilhelm.ogg", 1.8f, 1.8f);
 		
-		if (getNet().isServer())
+		if (isServer())
 		{
 			this.server_SetPlayer(null);
 			server_DropCoins(this.getPosition(), Maths::Max(0, Maths::Min(this.get_u16("stolen coins"), 5000)));
@@ -244,20 +244,6 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 		{
 			this.getSprite().PlaySound("scoutchicken_vo_hit" + (1 + XORRandom(3)) + ".ogg", 1, 0.8f);
 			this.set_u32("next sound", getGameTime() + 60);
-		}
-	}
-	
-	if (isServer())
-	{
-		CBrain@ brain = this.getBrain();
-		
-		if (brain !is null && hitterBlob !is null)
-		{
-			if (hitterBlob.getTeamNum() != this.getTeamNum() && hitterBlob.isCollidable()) 
-			{
-				if (brain.getTarget() is null) brain.SetTarget(hitterBlob);
-				else if (!hitterBlob.hasTag("material")) brain.SetTarget(hitterBlob);
-			}
 		}
 	}
 	

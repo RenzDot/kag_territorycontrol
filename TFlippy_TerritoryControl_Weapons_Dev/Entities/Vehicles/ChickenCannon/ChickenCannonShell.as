@@ -11,6 +11,11 @@ string[] particles =
 	"Explosion.png"
 };
 
+string[] particles_smoke = 
+{
+	"LargeSmoke"
+};
+
 void onInit(CBlob@ this)
 {
 	this.server_SetTimeToDie(20);
@@ -27,6 +32,7 @@ void onInit(CBlob@ this)
 	
 	this.set_f32("map_damage_radius", 96.0f);
 	this.set_f32("map_damage_ratio", 0.4f);
+	this.set_string("custom_explosion_sound", "ShockMine_explode.ogg");
 	
 	this.getSprite().SetFrame(0);
 	this.getSprite().getConsts().accurateLighting = false;
@@ -35,6 +41,10 @@ void onInit(CBlob@ this)
 	this.SetMapEdgeFlags(CBlob::map_collide_left | CBlob::map_collide_right);
 	this.getShape().SetGravityScale(1.18f);
 	this.sendonlyvisible = false;
+	
+	CShape@ shape = this.getShape();
+	ShapeConsts@ consts = shape.getConsts();
+	consts.bullet = true;
 	
 	CSprite@ sprite = this.getSprite();
 	sprite.SetEmitSound("Shell_Whistle.ogg");
@@ -114,7 +124,7 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ blob)
 
 void onCollision(CBlob@ this, CBlob@ blob, bool solid)
 {
-	if (getNet().isServer())
+	if (isServer())
 	{
 		if (blob !is null && doesCollideWithBlob(this, blob)) this.server_Die();
 		else if (solid) this.server_Die();
@@ -132,8 +142,8 @@ void DoExplosion(CBlob@ this)
 	f32 angle = this.getOldVelocity().Angle();
 	// print("Modifier: " + modifier + "; Quantity: " + this.getQuantity());
 
-	this.set_f32("map_damage_radius", 32.0f);
-	this.set_f32("map_damage_ratio", 0.25f);
+	this.set_f32("map_damage_radius", 48.0f);
+	this.set_f32("map_damage_ratio", 0.40f);
 	
 	Explode(this, 128.0f, 150.0f);
 	
@@ -146,15 +156,46 @@ void DoExplosion(CBlob@ this)
 		LinearExplosion(this, dir, 32.0f + XORRandom(16) + (modifier * 8), 24 + XORRandom(24), 4, 0.50f, Hitters::explosion);
 	}
 	
-	if(isClient())
+	if (isServer())
+	{
+		CBlob@ boom = server_CreateBlobNoInit("nukeexplosion");
+		if (boom !is null)
+		{
+			boom.setPosition(this.getPosition());
+			boom.set_u8("boom_start", 0);
+			boom.set_u8("boom_end", 4);
+			boom.set_u8("boom_frequency", 2);
+			boom.set_u32("boom_delay", 0);
+			boom.set_u32("flash_delay", 0);
+			boom.Tag("no fallout");
+			boom.Tag("no flash");
+			boom.Tag("no mithril");
+			// boom.Tag("no particles");
+			// boom.Tag("no explosion particles");
+			boom.set_string("custom_explosion_sound", "ShockMine_explode");
+			boom.Init();
+		}
+	}
+	
+	if (isClient())
 	{
 		Vec2f pos = this.getPosition();
 		CMap@ map = getMap();
 		
 		for (int i = 0; i < 35; i++)
 		{
-			MakeParticle(this, Vec2f( XORRandom(64) - 32, XORRandom(80) - 60), getRandomVelocity(-angle, XORRandom(220) * 0.01f, 90), particles[XORRandom(particles.length)]);
+			MakeParticle(this, Vec2f(XORRandom(64) - 32, XORRandom(80) - 60), getRandomVelocity(-angle, XORRandom(220) * 0.01f, 90), particles[XORRandom(particles.length)]);
 		}
+		
+		// for (int i = 0; i < 35; i++)
+		// {
+			// MakeParticleEmber(this, Vec2f(0, 0), getRandomVelocity(-angle, XORRandom(800) * 0.01f, 45), particles[XORRandom(particles.length)]);
+		// }
+		
+		// for (int i = 0; i < 15; i++)
+		// {
+			// MakeParticleSmoke(this, Vec2f(32 - XORRandom(64), 16 - XORRandom(32)), Vec2f(XORRandom(100) * 0.01f, -XORRandom(100) * 0.01f), particles_smoke[XORRandom(particles_smoke.length)]);
+		// }
 		
 		this.getSprite().Gib();
 	}
@@ -163,6 +204,24 @@ void DoExplosion(CBlob@ this)
 
 void MakeParticle(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
 {
-	if (!getNet().isClient()) return;
-	ParticleAnimated(CFileMatcher(filename).getFirst(), this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(4), XORRandom(100) * -0.00005f, true);
+	if (isClient())
+	{
+		ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 0.5f + XORRandom(100) * 0.01f, 1 + XORRandom(3), XORRandom(100) * -0.00005f, true);
+	}
 }
+
+// void MakeParticleEmber(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
+// {
+	// if (isClient())
+	// {
+		// ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 0.10f + XORRandom(100) * 0.01f, 5 + XORRandom(15), 0.30f, true);
+	// }
+// }
+
+// void MakeParticleSmoke(CBlob@ this, const Vec2f pos, const Vec2f vel, const string filename = "SmallSteam")
+// {
+	// if (isClient())
+	// {
+		// ParticleAnimated(filename, this.getPosition() + pos, vel, float(XORRandom(360)), 1.5f + XORRandom(100) * 0.01f, 8 + XORRandom(10), XORRandom(100) * -0.00005f, true);
+	// }
+// }

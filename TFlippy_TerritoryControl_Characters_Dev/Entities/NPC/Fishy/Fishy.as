@@ -74,6 +74,8 @@ void onInit(CBlob@ this)
 	this.getCurrentScript().runProximityTag = "player";
 	this.getCurrentScript().runProximityRadius = 480.0f;
 	this.getCurrentScript().runFlags |= Script::tick_not_attached;
+	
+	if (!this.exists("voice_pitch")) this.set_f32("voice pitch", 0.10f);
 }
 
 void onTick(CBlob@ this)
@@ -91,7 +93,7 @@ void onTick(CBlob@ this)
 			this.SetFacingLeft(false);
 	}
 
-	if (getNet().isServer())
+	if (isServer())
 	{
 		u8 age = this.get_u8("age");
 		if (age < 3)

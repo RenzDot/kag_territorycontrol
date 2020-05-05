@@ -28,7 +28,7 @@ void onTick(CBlob@ this)
 			f32 maxHealth = Maths::Ceil(Maths::Min(this.getInitialHealth() * 3.00f, this.getInitialHealth() + 5));
 			if (this.getHealth() < maxHealth)
 			{				
-				if (getNet().isServer())
+				if (isServer())
 				{
 					this.server_SetHealth(Maths::Min(this.getHealth() + health_increment, maxHealth));
 					this.set_f32("fiksed", Maths::Max(0, this.get_f32("fiksed") - health_increment));
@@ -36,7 +36,7 @@ void onTick(CBlob@ this)
 					if (this.isMyPlayer()) this.getSprite().PlaySound("heart.ogg", 0.50f, 1.00f);
 				}
 				
-				if (getNet().isClient())
+				if (isClient())
 				{
 					for (int i = 0; i < 4; i++)
 					{
